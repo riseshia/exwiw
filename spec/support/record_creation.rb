@@ -15,6 +15,7 @@
       order = Order.create(shop: shop, user: user)
       order_item = OrderItem.create(order: order, product: product)
       PaymentTransaction.create(order: order, amount: order_item.product.price * order_item.quantity)
+      Review.create(reviewable: product, user: user, rating: rand(1..5), content: "Review for #{product.name} by #{user.name}")
     end
   end
 end
