@@ -21,8 +21,8 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with(:truncation)
 
     # Load the schema before each test suite run
-    require_relative 'schema'
-    require_relative 'models'
+    require_relative 'support/schema'
+    require_relative 'support/models'
     require_relative 'support/record_creation'
   end
 
