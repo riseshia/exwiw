@@ -41,6 +41,7 @@ namespace :exwiw do
 
         columns = model.column_names.map { |name| { name: name } }
 
+        # XXX use Table
         relationships << {
           name: model.table_name,
           primary_key: model.primary_key,
@@ -50,7 +51,9 @@ namespace :exwiw do
         }
       end
 
+      # XXX: Pass target config from arg
       db_config = Rails.configuration.database_configuration[Rails.env]["replica"]
+      # XXX Use Config
       config = {
         database: {
           adapter: db_config["adapter"],

@@ -27,6 +27,8 @@ You want to export only the data you want to export.
 bundle add exwiw
 ```
 
+Most of cases, you want to add 'require: false' to the Gemfile.
+
 If bundler is not being used to manage dependencies, install the gem by executing:
 
 ```bash
