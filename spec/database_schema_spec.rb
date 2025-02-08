@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe 'Database schema' do
-  it 'creates the companies table' do
-    expect(ActiveRecord::Base.connection.table_exists?(:companies)).to be true
+  it 'creates the shops table' do
+    expect(ActiveRecord::Base.connection.table_exists?(:shops)).to be true
   end
 
   it 'creates the users table' do

@@ -5,7 +5,7 @@ require "active_record"
 ActiveRecord::Schema.define do
   self.verbose = false
 
-  create_table :companies, force: :cascade do |t|
+  create_table :shops, force: :cascade do |t|
     t.string :name, null: false
     t.timestamps
   end
@@ -13,19 +13,19 @@ ActiveRecord::Schema.define do
   create_table :users, force: :cascade do |t|
     t.string :name, null: false
     t.string :email, null: false
-    t.references :company, null: false, foreign_key: true
+    t.references :shop, null: false, foreign_key: true
     t.timestamps
   end
 
   create_table :products, force: :cascade do |t|
     t.string :name, null: false
     t.decimal :price, precision: 10, scale: 2, null: false
-    t.references :company, null: false, foreign_key: true
+    t.references :shop, null: false, foreign_key: true
     t.timestamps
   end
 
   create_table :orders, force: :cascade do |t|
-    t.references :company, null: false, foreign_key: true
+    t.references :shop, null: false, foreign_key: true
     t.timestamps
   end
 

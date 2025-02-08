@@ -4,25 +4,25 @@ class ApplicationRecord < ActiveRecord::Base
   self.abstract_class = true
 end
 
-class Company < ApplicationRecord
+class Shop < ApplicationRecord
   has_many :users
   has_many :products
   has_many :orders
 end
 
 class User < ApplicationRecord
-  belongs_to :company
+  belongs_to :shop
 end
 
 class Product < ApplicationRecord
-  belongs_to :company
+  belongs_to :shop
   has_many :order_items
   has_many :orders, through: :order_items
   has_many :reviews, as: :reviewable
 end
 
 class Order < ApplicationRecord
-  belongs_to :company
+  belongs_to :shop
   has_many :order_items
   has_many :products, through: :order_items
   has_one :payment_transaction
