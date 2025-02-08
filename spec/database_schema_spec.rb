@@ -28,4 +28,8 @@ RSpec.describe 'Database schema' do
   it 'creates the reviews table' do
     expect(ActiveRecord::Base.connection.table_exists?(:reviews)).to be true
   end
+
+  it 'creates the system_announcements table' do
+    expect(ActiveRecord::Base.connection.table_exists?(:system_announcements)).to be true
+  end
 end

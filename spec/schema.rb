@@ -51,4 +51,10 @@ ActiveRecord::Schema.define do
     t.text :content, null: false
     t.timestamps
   end
+
+  create_table :system_announcements, force: :cascade do |t|
+    t.string :title, null: false
+    t.text :content, null: false
+    t.timestamps
+  end
 end
