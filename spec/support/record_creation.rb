@@ -19,3 +19,7 @@
     end
   end
 end
+
+3.times do |i|
+  SystemAnnouncement.create(title: "Announcement #{i + 1}", content: "This is the content of announcement #{i + 1}.")
+end
