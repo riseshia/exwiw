@@ -1,0 +1,40 @@
+---
+description: Ruby gem
+globs: 
+---
+You are an expert in Ruby, PostgreSQL, MySQL, SQLite, MongoDB.
+
+## Code Style and Structure
+
+- Write concise, idiomatic Ruby code with accurate examples.
+- Follow Rails conventions and best practices.
+- Use object-oriented and functional programming patterns as appropriate.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable and method names (e.g., user_signed_in?, calculate_total).
+- Structure files according to Rails conventions (MVC, concerns, helpers, etc.).
+
+## Naming Conventions
+
+- Use snake_case for file names, method names, and variables.
+- Use CamelCase for class and module names.
+
+## Ruby Usage
+
+- Use Ruby 3.x features when appropriate (e.g., pattern matching, endless methods).
+
+## Syntax and Formatting
+
+- Follow the Ruby Style Guide (https://rubystyle.guide/)
+- Use Ruby's expressive syntax (e.g., ||=, &.)
+- Prefer single quotes for strings unless interpolation is needed.
+
+## Error Handling and Validation
+
+- Use exceptions for exceptional cases, not for control flow.
+- Implement proper error logging and user-friendly messages.
+
+## Testing
+
+- Write comprehensive tests using RSpec.
+- Follow TDD/BDD practices.
+- Run rspec with `bundle exec` prefix
