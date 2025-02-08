@@ -5,6 +5,12 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in exwiw.gemspec
 gemspec
 
-gem "rake", "~> 13.0"
+gem "rake"
 
-gem "rspec", "~> 3.0"
+gem "rspec"
+
+gem "sqlite3"
+gem "pg"
+gem "mysql2"
+gem "activerecord"
+gem "database_cleaner-active_record"

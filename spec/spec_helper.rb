@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "active_record"
+require "database_cleaner/active_record"
+
 require "exwiw"
 
 RSpec.configure do |config|
@@ -11,5 +14,34 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
+end
+
+ActiveRecord::Base.establish_connection(
+  adapter: "sqlite3",
+  database: ":memory:"
+)
+
+ActiveRecord::Schema.define do
+  self.verbose = false
+
+  create_table :users, force: true do |t|
+    t.string :email
+    t.integer :company_id
+  end
+
+  create_table :companies, force: true do |t|
+    t.string :name
   end
 end
