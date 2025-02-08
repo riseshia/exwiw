@@ -26,6 +26,7 @@ ActiveRecord::Schema.define do
 
   create_table :orders, force: :cascade do |t|
     t.references :shop, null: false, foreign_key: true
+    t.references :user, null: false, foreign_key: true
     t.timestamps
   end
 
