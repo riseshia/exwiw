@@ -5,4 +5,7 @@
   2.times do |j|
     User.create(name: "User \\#{j + 1}", email: "user\\#{j + 1}@example.com", shop: shop)
   end
+  3.times do |k|
+    Product.create(name: "Product \\#{k + 1}", price: (k + 1) * 10, shop: shop)
+  end
 end
