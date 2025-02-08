@@ -34,15 +34,14 @@ class OrderItem < ApplicationRecord
   belongs_to :product
 end
 
-class PaymentTransaction < Transaction
-  belongs_to :order
+class Transaction < ApplicationRecord
 end
 
 class PaymentTransaction < Transaction
   belongs_to :order
 end
 
-class RefundTransaction < ApplicationRecord
+class RefundTransaction < Transaction
   belongs_to :order
 end
 

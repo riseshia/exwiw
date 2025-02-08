@@ -22,6 +22,8 @@ RSpec.configure do |config|
 
     # Load the schema before each test suite run
     require_relative 'schema'
+    require_relative 'models'
+    require_relative 'support/record_creation'
   end
 
   config.around(:each) do |example|
