@@ -13,7 +13,8 @@
   users.each do |user|
     products.each do |product|
       order = Order.create(shop: shop, user: user)
-      OrderItem.create(order: order, product: product)
+      order_item = OrderItem.create(order: order, product: product)
+      PaymentTransaction.create(order: order, amount: order_item.product.price * order_item.quantity)
     end
   end
 end
