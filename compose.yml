@@ -1,0 +1,27 @@
+services:
+  mysql:
+    image: mysql:9
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  mysql_data:
+  postgres_data:
