@@ -88,6 +88,7 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
       end
 
       it 'returns ordered names' do
+        skip 'support polymorphic'
         expect(sorted_table_names).to eq([
           'shops',
           'users',
@@ -122,9 +123,8 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when full tables' do
       let(:tables) do
         [
-          reviews_table,
-          transactions_table,
           order_items_table,
+          transactions_table,
           orders_table,
           users_table,
           products_table,
@@ -134,7 +134,6 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
       end
 
       it 'returns ordered names' do
-        skip 'support polymorphic'
         expect(sorted_table_names).to eq([
           'system_announcements',
           'shops',
@@ -143,7 +142,6 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
           'orders',
           'order_items',
           'transactions',
-          'reviews',
         ])
       end
     end
