@@ -5,6 +5,9 @@ require "database_cleaner/active_record"
 
 require "exwiw"
 
+# Load the schema before each test suite run
+require_relative 'support/table_generator'
+
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
@@ -16,11 +19,12 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
+  config.include(TableGenerator)
+
   config.before(:suite) do
     DatabaseCleaner.strategy = :transaction
     DatabaseCleaner.clean_with(:truncation)
 
-    # Load the schema before each test suite run
     require_relative 'support/schema'
     require_relative 'support/models'
     require_relative 'support/record_creation'
