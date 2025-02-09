@@ -5,7 +5,8 @@ module Exwiw
     let(:connection_config) { { 'adapter' => 'sqlite3' } }
     let(:output_path) { 'test_output.sql' }
     let(:config_path) { 'test_config.json' }
-    let(:runner) { Runner.new(connection_config, output_path, config_path) }
+    let(:dump_target) { double('DumpTarget') }
+    let(:runner) { Runner.new(connection_config, output_path, config_path, dump_target) }
 
     before do
       allow(File).to receive(:read).with(config_path).and_return('{ "tables": [] }')
