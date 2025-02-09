@@ -13,7 +13,7 @@ module Exwiw
 
     def run
       config = load_config
-      adapter = build_adapter
+      adapter = Adapter.build(@connection_config)
 
       ordered_table_names = DetermineTableProcessingOrder.run(config.tables)
 

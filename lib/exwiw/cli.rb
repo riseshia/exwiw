@@ -38,6 +38,7 @@ module Exwiw
         validate_options!
 
         connection_config = ConnectionConfig.new(
+          adapter: @database_adapter,
           host: @database_host,
           port: @database_port,
           user: @database_user,
