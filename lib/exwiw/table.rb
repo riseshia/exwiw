@@ -84,5 +84,9 @@ module Exwiw
 
       matched_dependencies.min_by(&:size)
     end
+
+    def self.from_symbol_keys(hash)
+      from(hash.transform_keys(&:to_s))
+    end
   end
 end
