@@ -38,3 +38,68 @@ You are an expert in Ruby, PostgreSQL, MySQL, SQLite, MongoDB.
 - Write comprehensive tests using RSpec.
 - Follow TDD/BDD practices.
 - Run rspec with `bundle exec` prefix
+
+## Serdes
+
+Serdes is a tool for *ser*ializing and *des*erializing class.
+It provides:
+
+- general way to serialize and deserialize
+- simple type checking for attributes
+- basic implementation for some class to Hash.
+
+### Usage
+
+```ruby
+require "serdes"
+
+class User
+  include Serdes
+
+  rename_all_attributes :PascalCase
+
+  attribute :name, String
+  attribute :age, Integer
+  attribute :profile, optional(String)
+  attribute :tags, array(String)
+  attribute :has_pet, Boolean
+end
+
+user_hash = {
+  "Name" => "Alice",
+  "Age" => 20,
+  "HasPet" => true,
+  "Tags" => ["tag1", "tag2"]
+}
+
+user = User.from(user_hash)
+
+user_hash = {
+  "Name" => "Alice",
+  "Age" => 20,
+  "HasPet" => true,
+  "Tags" => ["tag1", "tag2"]
+}
+
+User.from(user_hash) # => raise Serdes::TypeError
+```
+
+### API
+
+- `<class>.from(obj)`: Deserialize object to <class> instance.
+  - `from` will call `from_<obj.class>` method if it exists. if not, it returns obj as it is.
+- `<class>#to_hash`: Serialize <class> instance to Hash.
+  - There is no support for serializaion, as only you need to do is just implement `to_<class>` method where you want.
+
+### Types
+
+`serdes` provides some convenient types for type checking:
+
+- `optional(type)`:  `type` | `nil`
+- `array`: Array of `type`
+
+### Macro
+
+- `rename_all_attributes`: Rename all attributes when serializing and deserializing.
+  - Supported: `:snake_case`, `:PascalCase`
+- `symbolize_all_keys`: Symbolize all keys when serializing and deserializing Hash, and vice versa.
