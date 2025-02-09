@@ -9,61 +9,38 @@ namespace :exwiw do
 
       Rails.application.eager_load!
 
-      relationships = []
+      tables = []
 
       ActiveRecord::Base.descendants.each do |model|
         next if model.abstract_class?
 
         belongs_to_relations = model.reflect_on_all_associations(:belongs_to).map do |assoc|
           if assoc.polymorphic?
-            {
-              polymorphic: true,
-              polymorphic_name: assoc.name,
-              foreign_type: assoc.foreign_type,
-              foreign_key: assoc.foreign_key,
-            }
+            # XXX: Support polymorphic
+            next
           else
-            {
-              polymorphic: false,
+            Exwiw::BelongsToRelation.from_symbol_keys({
               table_name: assoc.table_name,
               foreign_key: assoc.foreign_key,
-            }
+            })
           end
         end
 
-        polymorphic_as = []
-        model.reflect_on_all_associations(:has_many).each do |assoc|
-          polymorphic_as << assoc.options[:as] if assoc.options[:as]
-        end
-        model.reflect_on_all_associations(:has_one).each do |assoc|
-          polymorphic_as << assoc.options[:as] if assoc.options[:as]
+        columns = model.column_names.map do |name|
+          Exwiw::TableColumn.from_symbol_keys({ name: name })
         end
 
-        columns = model.column_names.map { |name| { name: name } }
-
-        # XXX use Table
-        relationships << {
+        tables << Exwiw::Table.from_symbol_keys({
           name: model.table_name,
           primary_key: model.primary_key,
           belongs_to_relations: belongs_to_relations,
-          polymorphic_as: polymorphic_as,
           columns: columns,
-        }
+        })
       end
 
-      # XXX: Pass target config from arg
-      db_config = Rails.configuration.database_configuration[Rails.env]["replica"]
-      # XXX Use Config
-      config = {
-        database: {
-          adapter: db_config["adapter"],
-          name: db_config["database"],
-          encoding: db_config["encoding"],
-        },
-        tables: relationships,
-      }
+      config = Exwiw::Config.from_symbol_keys({ tables: tables })
 
-      File.write("schema.json", JSON.pretty_generate(config))
+      File.write("schema.json", config.to_hash)
     end
   end
 end

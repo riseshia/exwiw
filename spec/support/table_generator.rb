@@ -6,7 +6,6 @@ module TableGenerator
       name: 'shops',
       primary_key: 'id',
       belongs_to_relations: [],
-      polymorphic_as: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
@@ -22,12 +21,10 @@ module TableGenerator
       primary_key: 'id',
       belongs_to_relations: [
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'shop_id',
           table_name: 'shops'
         }),
       ],
-      polymorphic_as: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
@@ -45,12 +42,10 @@ module TableGenerator
       primary_key: 'id',
       belongs_to_relations: [
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'shop_id',
           table_name: 'shops'
         }),
       ],
-      polymorphic_as: ['reviewable'],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
@@ -68,17 +63,14 @@ module TableGenerator
       primary_key: 'id',
       belongs_to_relations: [
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'shop_id',
           table_name: 'shops'
         }),
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'user_id',
           table_name: 'users'
         }),
       ],
-      polymorphic_as: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'shop_id' }),
@@ -95,17 +87,14 @@ module TableGenerator
       primary_key: 'id',
       belongs_to_relations: [
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'order_id',
           table_name: 'orders'
         }),
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'product_id',
           table_name: 'products'
         }),
       ],
-      polymorphic_as: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'quantity' }),
@@ -123,12 +112,10 @@ module TableGenerator
       primary_key: 'id',
       belongs_to_relations: [
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'order_id',
           table_name: 'orders'
         }),
       ],
-      polymorphic_as: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'type' }),
@@ -146,18 +133,10 @@ module TableGenerator
       primary_key: 'id',
       belongs_to_relations: [
         Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: true,
-          polymorphic_name: 'reviewable',
-          foreign_key: 'reviewable_id',
-          foreign_type: 'reviewable_type',
-        }),
-        Exwiw::BelongsToRelation.from_symbol_keys({
-          polymorphic: false,
           foreign_key: 'user_id',
           table_name: 'users'
         }),
       ],
-      polymorphic_as: ['reviewable'],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'rating' }),
@@ -176,7 +155,6 @@ module TableGenerator
       name: 'system_announcements',
       primary_key: 'id',
       belongs_to_relations: [],
-      polymorphic_as: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'title' }),

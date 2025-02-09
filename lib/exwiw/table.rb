@@ -7,7 +7,6 @@ module Exwiw
     attribute :name, String
     attribute :primary_key, String
     attribute :belongs_to_relations, array(BelongsToRelation)
-    attribute :polymorphic_as, array(String)
     attribute :columns, array(TableColumn)
 
     def column_names
@@ -61,9 +60,6 @@ module Exwiw
       return [] if belongs_to_relations.empty?
 
       results = belongs_to_relations.map do |relation|
-        # XXX: ignore polymorphic for now. to be implemented
-        next if relation.polymorphic
-
         relation_table = tables_by_name[relation.table_name]
 
         if relation_table.name == target_table_name

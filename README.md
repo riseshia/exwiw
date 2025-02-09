@@ -67,9 +67,6 @@ bundle exec rake exwiw:schema:generate
 
 ```json
 {
-    "database": {
-        "name": "app_production",
-    },
     "tables": [{
         "name": "users",
         "primary_key": "id",
@@ -77,9 +74,6 @@ bundle exec rake exwiw:schema:generate
             "name": "companies",
             "foreign_key": "company_id"
         }],
-        "polymorphic_as": [
-            "loggable"
-        ],
         "columns": [{
             "name": "id",
         }, {
