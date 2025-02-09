@@ -53,7 +53,6 @@ module Exwiw
           "Target database host" => @database_host,
           "Target database port" => @database_port,
           "Database user" => @database_user,
-          "Output file path" => @output,
         }.each do |k, v|
           if v.nil?
             $stderr.puts "#{k} is required"
@@ -82,7 +81,7 @@ module Exwiw
         opts.on("-h", "--host=HOST", "Target database host") { |v| @database_host = v }
         opts.on("-p", "--port=PORT", "Target database port") { |v| @database_port = v }
         opts.on("-u", "--user=USERNAME", "Target database user") { |v| @database_user = v }
-        opts.on("-o", "--output=DUMP_FILE_PATH", "Output file path. default is dump.sql") { |v| @output = v }
+        opts.on("-o", "--output=[DUMP_FILE_PATH]", "Output file path. default is dump.sql") { |v| @output = v }
         opts.on("-c", "--config=[CONFIG_FILE_PATH]", "Config file path. default is schema.json") { |v| @config_path = v }
         opts.on("-a", "--adapter=ADAPTER", "Database adapter") { |v| @database_adapter = v }
 
