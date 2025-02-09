@@ -13,7 +13,7 @@ module Exwiw
       config = load_config
       adapter = build_adapter
 
-      ordered_tables = determine_order(config.tables)
+      ordered_tables = DetermineTableProcessingOrder.run(config.tables)
 
       File.open(@output_path, 'w') do |file|
         ordered_tables.each do |table|
@@ -37,11 +37,6 @@ module Exwiw
       else
         raise "Unsupported adapter"
       end
-    end
-
-    private def determine_order(tables)
-      # 테이블 간의 의존성을 고려하여 순서를 결정하는 로직을 구현합니다.
-      tables.sort_by { |table| table.name } # 예시로 이름순 정렬
     end
 
     private def build_query(table)

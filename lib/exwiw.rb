@@ -4,6 +4,7 @@ require_relative "exwiw/version"
 
 require "serdes"
 
+require_relative "exwiw/determine_table_processing_order"
 require_relative "exwiw/runner"
 require_relative "exwiw/belongs_to_relation"
 require_relative "exwiw/table_column"
