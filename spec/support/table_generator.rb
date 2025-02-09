@@ -5,7 +5,7 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'shops',
       primary_key: 'id',
-      belongs_to_relations: [],
+      belongs_tos: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
@@ -19,8 +19,8 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'users',
       primary_key: 'id',
-      belongs_to_relations: [
-        Exwiw::BelongsToRelation.from_symbol_keys({
+      belongs_tos: [
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'shop_id',
           table_name: 'shops'
         }),
@@ -40,8 +40,8 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'products',
       primary_key: 'id',
-      belongs_to_relations: [
-        Exwiw::BelongsToRelation.from_symbol_keys({
+      belongs_tos: [
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'shop_id',
           table_name: 'shops'
         }),
@@ -61,12 +61,12 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'orders',
       primary_key: 'id',
-      belongs_to_relations: [
-        Exwiw::BelongsToRelation.from_symbol_keys({
+      belongs_tos: [
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'shop_id',
           table_name: 'shops'
         }),
-        Exwiw::BelongsToRelation.from_symbol_keys({
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'user_id',
           table_name: 'users'
         }),
@@ -85,12 +85,12 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'order_items',
       primary_key: 'id',
-      belongs_to_relations: [
-        Exwiw::BelongsToRelation.from_symbol_keys({
+      belongs_tos: [
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'order_id',
           table_name: 'orders'
         }),
-        Exwiw::BelongsToRelation.from_symbol_keys({
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'product_id',
           table_name: 'products'
         }),
@@ -110,8 +110,8 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'transactions',
       primary_key: 'id',
-      belongs_to_relations: [
-        Exwiw::BelongsToRelation.from_symbol_keys({
+      belongs_tos: [
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'order_id',
           table_name: 'orders'
         }),
@@ -131,8 +131,8 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'reviews',
       primary_key: 'id',
-      belongs_to_relations: [
-        Exwiw::BelongsToRelation.from_symbol_keys({
+      belongs_tos: [
+        Exwiw::BelongsTo.from_symbol_keys({
           foreign_key: 'user_id',
           table_name: 'users'
         }),
@@ -154,7 +154,7 @@ module TableGenerator
     Exwiw::Table.from_symbol_keys({
       name: 'system_announcements',
       primary_key: 'id',
-      belongs_to_relations: [],
+      belongs_tos: [],
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'title' }),

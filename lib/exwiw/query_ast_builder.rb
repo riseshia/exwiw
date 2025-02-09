@@ -4,10 +4,12 @@ module Exwiw
   module QueryAstBuilder
     module_function
 
-    def run(table, all_tables, dump_target)
+    def run(table_name, all_tables, dump_target)
       table_by_name = all_tables.each_with_object({}) do |table, acc|
         acc[table.name] = table
       end
+
+      table = table_by_name.fetch(table_name)
 
       where_clauses = build_where_clauses(table, dump_target)
       join_clauses = build_join_clauses(table, table_by_name, dump_target)
@@ -92,7 +94,7 @@ module Exwiw
         next if visited[current_table_name]
         visited[current_table_name] = true
 
-        current_table.belongs_to_relations.each do |relation|
+        current_table.belongs_tos.each do |relation|
           next_table_name = relation.table_name
           next_path = path + [current_table_name]
 

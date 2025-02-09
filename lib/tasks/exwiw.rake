@@ -14,12 +14,12 @@ namespace :exwiw do
       ActiveRecord::Base.descendants.each do |model|
         next if model.abstract_class?
 
-        belongs_to_relations = model.reflect_on_all_associations(:belongs_to).map do |assoc|
+        belongs_tos = model.reflect_on_all_associations(:belongs_to).map do |assoc|
           if assoc.polymorphic?
             # XXX: Support polymorphic
             next
           else
-            Exwiw::BelongsToRelation.from_symbol_keys({
+            Exwiw::BelongsTo.from_symbol_keys({
               table_name: assoc.table_name,
               foreign_key: assoc.foreign_key,
             })
@@ -33,7 +33,7 @@ namespace :exwiw do
         tables << Exwiw::Table.from_symbol_keys({
           name: model.table_name,
           primary_key: model.primary_key,
-          belongs_to_relations: belongs_to_relations,
+          belongs_tos: belongs_tos,
           columns: columns,
         })
       end

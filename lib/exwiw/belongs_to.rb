@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Exwiw
-  class BelongsToRelation
+  class BelongsTo
     include Serdes
 
     attribute :foreign_key, String

@@ -26,7 +26,7 @@ module Exwiw
         results = adapter.execute(query_ast)
         insert_sql = adapter.to_bulk_insert(results, table_name)
 
-        File.open(File.join(@output_dir, "#{idx.to_s.ljust(3, '0')}-#{table_name}.sql"), 'w') do |file|
+        File.open(File.join(@output_dir, "#{idx.to_s.rjust(3, '0')}-#{table_name}.sql"), 'w') do |file|
           file.puts(insert_sql)
         end
       end

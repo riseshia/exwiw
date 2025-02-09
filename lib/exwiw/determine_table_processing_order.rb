@@ -32,7 +32,7 @@ module Exwiw
     end
 
     def compute_table_dependencies(table)
-      table.belongs_to_relations.each_with_object([]) do |relation, acc|
+      table.belongs_tos.each_with_object([]) do |relation, acc|
         acc << relation.table_name
       end
     end

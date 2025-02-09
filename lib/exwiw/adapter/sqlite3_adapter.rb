@@ -30,20 +30,24 @@ module Exwiw
           sql += " JOIN #{join.join_table_name} ON #{query_ast.from_table_name}.#{join.foreign_key} = #{join.join_table_name}.#{join.primary_key}"
 
           join.where_clauses.each do |where|
-            sql += " AND #{join.join_table_name}.#{where.column_name} = #{where.value}"
+            sql += " AND #{join.join_table_name}.#{where.column_name} = #{where.value.first}"
           end
         end
 
         if query_ast.where_clauses.any?
           sql += " WHERE "
-          sql += query_ast.where_clauses.map { |where| "#{query_ast.from_table_name}.#{where.column_name} = #{where.value}" }.join(' AND ')
+          sql += query_ast.where_clauses.map { |where| "#{query_ast.from_table_name}.#{where.column_name} = #{where.value.first}" }.join(' AND ')
         end
 
         sql
       end
 
       private def connection
-        @connection ||= SQLite3::Database.new(@connection_config.database_name)
+        @connection ||=
+          begin
+            require 'sqlite3'
+            SQLite3::Database.new(@connection_config.database_name)
+          end
       end
     end
   end

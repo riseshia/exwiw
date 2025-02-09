@@ -23,7 +23,7 @@ module Exwiw
             QueryAst::WhereClause.new(
               column_name: "id",
               operator: :eq,
-              value: 1,
+              value: [1],
             )
           )
         end
@@ -37,7 +37,7 @@ module Exwiw
             QueryAst::WhereClause.new(
               column_name: "shop_id",
               operator: :eq,
-              value: 1,
+              value: [1],
             )
           )
         end
@@ -56,7 +56,7 @@ module Exwiw
                 QueryAst::WhereClause.new(
                   column_name: "shop_id",
                   operator: :eq,
-                  value: 1,
+                  value: [1],
                 )
               ],
             )

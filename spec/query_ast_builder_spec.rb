@@ -16,7 +16,7 @@ RSpec.describe Exwiw::QueryAstBuilder do
         system_announcements_table,
       ]
     end
-    let(:built_query_ast) { described_class.run(table, all_tables, dump_target) }
+    let(:built_query_ast) { described_class.run(table.name, all_tables, dump_target) }
 
     context 'when the table is same as dump target table' do
       let(:table) { shops_table }

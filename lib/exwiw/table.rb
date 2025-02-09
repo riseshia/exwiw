@@ -6,7 +6,7 @@ module Exwiw
 
     attribute :name, String
     attribute :primary_key, String
-    attribute :belongs_to_relations, array(BelongsToRelation)
+    attribute :belongs_tos, array(BelongsTo)
     attribute :columns, array(TableColumn)
 
     def self.from_symbol_keys(hash)
@@ -18,7 +18,7 @@ module Exwiw
     end
 
     def belongs_to(table_name)
-      belongs_to_relations.find { |relation| relation.table_name == table_name }
+      belongs_tos.find { |relation| relation.table_name == table_name }
     end
 
     def build_extract_query(extract_target_table, extract_target_ids, tables_by_name)
@@ -33,7 +33,7 @@ module Exwiw
       end
 
       # it is not related to target table
-      if belongs_to_relations.empty?
+      if belongs_to.empty?
         return [{
           from: name,
           where: [],
@@ -42,7 +42,7 @@ module Exwiw
         }]
       end
 
-      belongs_to_extract_target_table = belongs_to_relations.find { |relation| relation.table_name == extract_target_table }
+      belongs_to_extract_target_table = belongs_tos.find { |relation| relation.table_name == extract_target_table }
       if belongs_to_extract_target_table
         key = belongs_to_extract_target_table.foreign_key
         return [{ from: name, where: [{ key => extract_target_ids }], join: [], select: column_names }]
@@ -65,9 +65,9 @@ module Exwiw
     end
 
     private def compute_dependency_to_table(target_table_name, tables_by_name)
-      return [] if belongs_to_relations.empty?
+      return [] if belongs_tos.empty?
 
-      results = belongs_to_relations.map do |relation|
+      results = belongs_tos.map do |relation|
         relation_table = tables_by_name[relation.table_name]
 
         if relation_table.name == target_table_name
