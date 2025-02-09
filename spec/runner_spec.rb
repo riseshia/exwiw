@@ -19,8 +19,8 @@ module Exwiw
 
     before do
       allow(File).to receive(:read).with(config_path).and_return('{ "adapter": "sqlite3", "tables": [] }')
-      allow_any_instance_of(Adapter::SqliteAdapter).to receive(:execute).and_return([])
-      allow_any_instance_of(Adapter::SqliteAdapter).to receive(:to_bulk_insert).and_return('INSERT INTO ...')
+      allow_any_instance_of(Adapter::Sqlite3Adapter).to receive(:execute).and_return([])
+      allow_any_instance_of(Adapter::Sqlite3Adapter).to receive(:to_bulk_insert).and_return('INSERT INTO ...')
     end
 
     it 'writes bulk insert SQL to the output file' do

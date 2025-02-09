@@ -40,7 +40,7 @@ module Exwiw
     private def build_adapter
       case @connection_config["adapter"]
       when "sqlite3"
-        SqliteAdapter.new(@connection_config)
+        Sqlite3Adapter.new(@connection_config)
       else
         raise "Unsupported adapter"
       end

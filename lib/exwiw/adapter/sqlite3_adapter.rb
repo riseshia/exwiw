@@ -2,7 +2,7 @@
 
 module Exwiw
   module Adapter
-    class SqliteAdapter < Base
+    class Sqlite3Adapter < Base
       def execute(query)
         # 쿼리를 실행하고 결과를 반환하는 로직을 구현합니다.
         [] # 예시로 빈 배열 반환
