@@ -42,7 +42,7 @@ gem install exwiw
 ```bash
 # dump & masking all records from database to dump.sql based on schema.json
 # pass database password as an environment variable 'DATABASE_PASSWORD'
-exwiw --host=localhost --port=3306 --user=reader --config schema.json --output dump.sql
+exwiw --adaptor=mysql2 --host=localhost --port=3306 --user=reader --config schema.json --output dump.sql
 ```
 
 ### Generator
@@ -59,7 +59,6 @@ bundle exec rake exwiw:schema:generate
 ```json
 {
     "database": {
-        "adapter": "mysql",
         "name": "app_production",
     },
     "tables": [{

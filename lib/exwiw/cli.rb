@@ -23,6 +23,7 @@ module Exwiw
       @database_password = ENV["DATABASE_PASSWORD"]
       @output = "dump.sql"
       @config_path = "schema.json"
+      @database_adapter = nil
 
       parser.parse!(@argv)
     end
@@ -47,21 +48,23 @@ module Exwiw
     ConnectionConfig = Struct.new(:host, :port, :user, :password, keyword_init: true)
 
     private def validate_options!
-      {
-        "Target database host" => @database_host,
-        "Target database port" => @database_port,
-        "Database user" => @database_user,
-        "Output file path" => @output,
-      }.each do |k, v|
-        if v.nil?
-          $stderr.puts "#{k} is required"
+      if @database_adapter != "sqlite3"
+        {
+          "Target database host" => @database_host,
+          "Target database port" => @database_port,
+          "Database user" => @database_user,
+          "Output file path" => @output,
+        }.each do |k, v|
+          if v.nil?
+            $stderr.puts "#{k} is required"
+            exit 1
+          end
+        end
+
+        if @database_password.nil? || @database_password.empty?
+          $stderr.puts "environment variable 'DATABASE_PASSWORD' is required"
           exit 1
         end
-      end
-
-      if @database_password.nil? || @database_password.empty?
-        $stderr.puts "environment variable 'DATABASE_PASSWORD' is required"
-        exit 1
       end
     end
 
@@ -75,6 +78,7 @@ module Exwiw
         opts.on("-u", "--user=USERNAME", "Target database user") { |v| @database_user = v }
         opts.on("-o", "--output=DUMP_FILE_PATH", "Output file path. default is dump.sql") { |v| @output = v }
         opts.on("-c", "--config=[CONFIG_FILE_PATH]", "Config file path. default is schema.json") { |v| @config_path = v }
+        opts.on("-a", "--adapter=ADAPTER", "Database adapter") { |v| @database_adapter = v }
 
         opts.on("--help", "Print this help") do
           @help = true
