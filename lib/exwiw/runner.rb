@@ -15,18 +15,18 @@ module Exwiw
       config = load_config
       adapter = build_adapter
 
-      ordered_tables = DetermineTableProcessingOrder.run(config.tables)
+      ordered_table_names = DetermineTableProcessingOrder.run(config.tables)
 
       if !Dir.exist?(@output_dir)
         FileUtils.mkdir_p(@output_dir)
       end
 
-      ordered_tables.each do |table|
-        query = QueryAstBuilder.run(table, config.tables, @dump_target)
+      ordered_table_names.each do |table_name|
+        query = QueryAstBuilder.run(table_name, config.tables, @dump_target)
         results = adapter.execute(query)
-        insert_sql = adapter.to_bulk_insert(results, table)
+        insert_sql = adapter.to_bulk_insert(results, table_name)
 
-        File.open(File.join(@output_dir, "#{table}.sql"), 'w') do |file|
+        File.open(File.join(@output_dir, "#{table_name}.sql"), 'w') do |file|
           file.puts(insert_sql)
         end
       end
