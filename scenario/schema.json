@@ -1,0 +1,120 @@
+{
+  "tables": [{
+    "name": "shops",
+    "primary_key": "id",
+    "belongs_tos": [],
+    "columns": [{
+      "name": "id"
+    }, {
+      "name": "name"
+    }, {
+      "name": "updated_at"
+    }, {
+      "name": "created_at"
+    }]
+  }, {
+    "name": "users",
+    "primary_key": "id",
+    "belongs_tos": [{
+      "table_name": "shops",
+      "foreign_key": "shop_id"
+    }],
+    "columns": [{
+      "name": "id"
+    }, {
+      "name": "name"
+    }, {
+      "name": "email"
+    }, {
+      "name": "shop_id"
+    }, {
+      "name": "updated_at"
+    }, {
+      "name": "created_at"
+    }]
+  }, {
+    "name": "products",
+    "primary_key": "id",
+    "belongs_tos": [{
+      "table_name": "shops",
+      "foreign_key": "shop_id"
+    }],
+    "columns": [{
+      "name": "id"
+    }, {
+      "name": "name"
+    }, {
+      "name": "price"
+    }, {
+      "name": "shop_id"
+    }, {
+      "name": "updated_at"
+    }, {
+      "name": "created_at"
+    }]
+  }, {
+    "name": "orders",
+    "primary_key": "id",
+    "belongs_tos": [{
+      "table_name": "shops",
+      "foreign_key": "shop_id"
+    }, {
+      "table_name": "users",
+      "foreign_key": "user_id"
+    }],
+    "columns": [{
+      "name": "id"
+    }, {
+      "name": "shop_id"
+    }, {
+      "name": "user_id"
+    }, {
+      "name": "updated_at"
+    }, {
+      "name": "created_at"
+    }]
+  }, {
+    "name": "order_items",
+    "primary_key": "id",
+    "belongs_tos": [{
+      "table_name": "orders",
+      "foreign_key": "order_id"
+    }, {
+      "table_name": "products",
+      "foreign_key": "product_id"
+    }],
+    "columns": [{
+      "name": "id"
+    }, {
+      "name": "quantity"
+    }, {
+      "name": "order_id"
+    }, {
+      "name": "product_id"
+    }, {
+      "name": "updated_at"
+    }, {
+      "name": "created_at"
+    }]
+  }, {
+    "name": "transactions",
+    "primary_key": "id",
+    "belongs_tos": [{
+      "table_name": "orders",
+      "foreign_key": "order_id"
+    }],
+    "columns": [{
+      "name": "id"
+    }, {
+      "name": "type"
+    }, {
+      "name": "amount"
+    }, {
+      "name": "order_id"
+    }, {
+      "name": "updated_at"
+    }, {
+      "name": "created_at"
+    }]
+  }]
+}

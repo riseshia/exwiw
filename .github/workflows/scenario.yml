@@ -1,0 +1,24 @@
+name: Scenario
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+
+jobs:
+  with_sqlite3:
+    runs-on: ubuntu-latest
+    name: Scenario with sqlite3
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+
+      - name: Run exwiw
+        run: scenario/test_with_sqlite3.sh
