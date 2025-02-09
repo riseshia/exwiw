@@ -12,12 +12,16 @@ module Exwiw
       config = load_config
       adapter = build_adapter
 
-      dump_queries = DumpQueryBuilder.new(config.tables).run
+      ordered_tables = determine_order(config.tables)
 
-      sqls = dump_queries.map { |q| adapter.to_sql(q) }
-
-      sqls.join("\n")
-      puts @config.tables
+      File.open(@output_path, 'w') do |file|
+        ordered_tables.each do |table|
+          query = build_query(table)
+          results = adapter.execute(query)
+          insert_sql = adapter.to_bulk_insert(results, table)
+          file.puts(insert_sql)
+        end
+      end
     end
 
     private def load_config
@@ -32,6 +36,16 @@ module Exwiw
       else
         raise "Unsupported adapter"
       end
+    end
+
+    private def determine_order(tables)
+      # 테이블 간의 의존성을 고려하여 순서를 결정하는 로직을 구현합니다.
+      tables.sort_by { |table| table.name } # 예시로 이름순 정렬
+    end
+
+    private def build_query(table)
+      # 테이블에 대한 쿼리를 생성하는 로직을 구현합니다.
+      "SELECT * FROM \\#{table.name} WHERE ..." # 조건을 추가해야 합니다.
     end
   end
 end

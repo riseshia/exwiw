@@ -10,6 +10,7 @@ require_relative "exwiw/belongs_to_relation"
 require_relative "exwiw/table_column"
 require_relative "exwiw/table"
 require_relative "exwiw/config"
+require_relative "exwiw/sqlite_adapter"
 
 module Exwiw
   class Error < StandardError; end
