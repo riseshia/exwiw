@@ -48,8 +48,8 @@ exwiw \
   --port=3306 \
   --user=reader \
   --database=app_production \
-  --config schema.json \
-  --output dump.sql
+  --config=schema.json \
+  --output=dump.sql
 ```
 
 ### Generator
