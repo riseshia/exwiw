@@ -72,7 +72,7 @@ module Exwiw
       belongs_to = table.belongs_to(dump_target.table_name)
       return clauses if belongs_to.nil?
 
-      clauses.push(
+      clauses.push Exwiw::QueryAst::WhereClause.new(
         column_name: belongs_to.foreign_key,
         operator: :eq,
         value: dump_target.ids
