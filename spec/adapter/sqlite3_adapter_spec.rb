@@ -49,6 +49,7 @@ module Exwiw
           ast.select(["id", "order_id"])
           ast.join(
             QueryAst::JoinClause.new(
+              base_table_name: "order_items",
               foreign_key: "order_id",
               join_table_name: "orders",
               primary_key: "id",

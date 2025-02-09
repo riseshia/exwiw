@@ -39,6 +39,7 @@ module Exwiw
 
         join_clauses.push(
           QueryAst::JoinClause.new(
+            base_table_name: from_table.name,
             foreign_key: relation.foreign_key,
             join_table_name: to_table.name,
             primary_key: to_table.primary_key,

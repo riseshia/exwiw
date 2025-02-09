@@ -3,9 +3,10 @@
 module Exwiw
   module QueryAst
     class JoinClause
-      attr_reader :foreign_key, :join_table_name, :primary_key, :where_clauses
+      attr_reader :base_table_name, :foreign_key, :join_table_name, :primary_key, :where_clauses
 
-      def initialize(foreign_key:, join_table_name:, primary_key:, where_clauses: [])
+      def initialize(base_table_name:, foreign_key:, join_table_name:, primary_key:, where_clauses: [])
+        @base_table_name = base_table_name
         @foreign_key = foreign_key
         @join_table_name = join_table_name
         @primary_key = primary_key
@@ -14,6 +15,7 @@ module Exwiw
 
       def to_h
         hash = {
+          base_table_name: base_table_name,
           foreign_key: foreign_key,
           join_table_name: join_table_name,
           primary_key: primary_key,
