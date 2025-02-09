@@ -54,9 +54,6 @@ module Exwiw
       end
     end
 
-    DumpTarget = Struct.new(:table_name, :ids, keyword_init: true)
-    ConnectionConfig = Struct.new(:host, :port, :user, :password, :database_name, keyword_init: true)
-
     private def validate_options!
       if @database_adapter != "sqlite3"
         {

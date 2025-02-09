@@ -17,7 +17,7 @@ module Exwiw
 
       File.open(@output_path, 'w') do |file|
         ordered_tables.each do |table|
-          query = build_query(table)
+          query = QueryAstBuilder.run(table, config.tables, @dump_target)
           results = adapter.execute(query)
           insert_sql = adapter.to_bulk_insert(results, table)
           file.puts(insert_sql)
@@ -37,11 +37,6 @@ module Exwiw
       else
         raise "Unsupported adapter"
       end
-    end
-
-    private def build_query(table)
-      # 테이블에 대한 쿼리를 생성하는 로직을 구현합니다.
-      "SELECT * FROM \\#{table.name} WHERE ..." # 조건을 추가해야 합니다.
     end
   end
 end

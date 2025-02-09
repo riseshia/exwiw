@@ -9,8 +9,16 @@ module Exwiw
     attribute :belongs_to_relations, array(BelongsToRelation)
     attribute :columns, array(TableColumn)
 
+    def self.from_symbol_keys(hash)
+      from(hash.transform_keys(&:to_s))
+    end
+
     def column_names
       columns.map(&:name)
+    end
+
+    def belongs_to(table_name)
+      belongs_to_relations.find { |relation| relation.table_name == table_name }
     end
 
     def build_extract_query(extract_target_table, extract_target_ids, tables_by_name)
@@ -56,7 +64,7 @@ module Exwiw
       end
     end
 
-    def compute_dependency_to_table(target_table_name, tables_by_name)
+    private def compute_dependency_to_table(target_table_name, tables_by_name)
       return [] if belongs_to_relations.empty?
 
       results = belongs_to_relations.map do |relation|
@@ -79,10 +87,6 @@ module Exwiw
       return [] if matched_dependencies.empty?
 
       matched_dependencies.min_by(&:size)
-    end
-
-    def self.from_symbol_keys(hash)
-      from(hash.transform_keys(&:to_s))
     end
   end
 end
