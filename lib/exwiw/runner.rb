@@ -2,10 +2,11 @@
 
 module Exwiw
   class Runner
-    def initialize(connection_config, output_path, config_path)
+    def initialize(connection_config, output_path, config_path, dump_target)
       @connection_config = connection_config
       @output_path = output_path
       @config_path = config_path
+      @dump_target = dump_target
     end
 
     def run

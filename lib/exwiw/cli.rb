@@ -45,10 +45,16 @@ module Exwiw
           database_name: @database_name,
         )
 
-        Runner.new(connection_config, @output_path, @config_path).run
+        dump_target = DumpTarget.new(
+          table_name: @target_table_name,
+          ids: @ids,
+        )
+
+        Runner.new(connection_config, @output_path, @config_path, dump_target).run
       end
     end
 
+    DumpTarget = Struct.new(:table_name, :ids, keyword_init: true)
     ConnectionConfig = Struct.new(:host, :port, :user, :password, :database_name, keyword_init: true)
 
     private def validate_options!
