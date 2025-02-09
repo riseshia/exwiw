@@ -50,9 +50,12 @@ RSpec.describe Exwiw::QueryAstBuilder do
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('order_items')
         expect(built_query_ast.column_names).to eq(['id', 'quantity', 'order_id', 'product_id', 'created_at', 'updated_at'])
-        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([
-          { foreign_key: 'order_id', join_table_name: 'orders', primary_key: 'id' },
-          { foreign_key: 'shop_id', join_table_name: 'shops', primary_key: 'id', where_clauses: [{ column_name: 'id', operator: :eq, value: [1] }] },
+        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
+          base_table_name: 'order_items',
+          foreign_key: 'order_id',
+          join_table_name: 'orders',
+          primary_key: 'id',
+          where_clauses: [{ column_name: 'shop_id', operator: :eq, value: [1] }] },
         ])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([])
       end
@@ -64,9 +67,12 @@ RSpec.describe Exwiw::QueryAstBuilder do
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('transactions')
         expect(built_query_ast.column_names).to eq(['id', 'type', 'amount', 'order_id', 'created_at', 'updated_at'])
-        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([
-          { foreign_key: 'order_id', join_table_name: 'orders', primary_key: 'id' },
-          { foreign_key: 'shop_id', join_table_name: 'shops', primary_key: 'id', where_clauses: [{ column_name: 'id', operator: :eq, value: [1] }] },
+        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
+          base_table_name: 'transactions',
+          foreign_key: 'order_id',
+          join_table_name: 'orders',
+          primary_key: 'id',
+          where_clauses: [{ column_name: 'shop_id', operator: :eq, value: [1] }] },
         ])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([])
       end
