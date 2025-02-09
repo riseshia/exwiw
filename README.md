@@ -51,7 +51,7 @@ exwiw \
   --config=schema.json \
   --target-table=shops \
   --ids=1 \ # comma separated ids
-  --output=dump.sql
+  --output-dir=dump
 ```
 
 ### Generator

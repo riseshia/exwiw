@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require "fileutils"
+
 module Exwiw
   class Runner
-    def initialize(connection_config, output_path, config_path, dump_target)
+    def initialize(connection_config, output_dir, config_path, dump_target)
       @connection_config = connection_config
-      @output_path = output_path
+      @output_dir = output_dir
       @config_path = config_path
       @dump_target = dump_target
     end
@@ -15,11 +17,16 @@ module Exwiw
 
       ordered_tables = DetermineTableProcessingOrder.run(config.tables)
 
-      File.open(@output_path, 'w') do |file|
-        ordered_tables.each do |table|
-          query = QueryAstBuilder.run(table, config.tables, @dump_target)
-          results = adapter.execute(query)
-          insert_sql = adapter.to_bulk_insert(results, table)
+      if !Dir.exist?(@output_dir)
+        FileUtils.mkdir_p(@output_dir)
+      end
+
+      ordered_tables.each do |table|
+        query = QueryAstBuilder.run(table, config.tables, @dump_target)
+        results = adapter.execute(query)
+        insert_sql = adapter.to_bulk_insert(results, table)
+
+        File.open(File.join(@output_dir, "#{table}.sql"), 'w') do |file|
           file.puts(insert_sql)
         end
       end

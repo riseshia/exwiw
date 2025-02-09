@@ -21,7 +21,7 @@ module Exwiw
       @database_port = nil
       @database_user = nil
       @database_password = ENV["DATABASE_PASSWORD"]
-      @output_path = "dump.sql"
+      @output_dir = "dump"
       @config_path = "schema.json"
       @database_adapter = nil
       @database_name = nil
@@ -50,7 +50,7 @@ module Exwiw
           ids: @ids,
         )
 
-        Runner.new(connection_config, @output_path, @config_path, dump_target).run
+        Runner.new(connection_config, @output_dir, @config_path, dump_target).run
       end
     end
 
@@ -99,7 +99,9 @@ module Exwiw
         opts.on("-h", "--host=HOST", "Target database host") { |v| @database_host = v }
         opts.on("-p", "--port=PORT", "Target database port") { |v| @database_port = v }
         opts.on("-u", "--user=USERNAME", "Target database user") { |v| @database_user = v }
-        opts.on("-o", "--output=[DUMP_FILE_PATH]", "Output file path. default is dump.sql") { |v| @output_path = v }
+        opts.on("-o", "--output-dir=[DUMP_DIR_PATH]", "Output file path. default is dump/") do |v|
+          @output_dir = v.end_with?("/") ? v[0..-2] : v
+        end
         opts.on("-c", "--config=[CONFIG_FILE_PATH]", "Config file path. default is schema.json") { |v| @config_path = v }
         opts.on("-a", "--adapter=ADAPTER", "Database adapter") { |v| @database_adapter = v }
         opts.on("--database=DATABASE", "Target database name") { |v| @database_name = v }

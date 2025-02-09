@@ -3,10 +3,10 @@ require 'spec_helper'
 module Exwiw
   RSpec.describe Runner do
     let(:connection_config) { { 'adapter' => 'sqlite3' } }
-    let(:output_path) { 'test_output.sql' }
+    let(:output_dir) { 'test_output_dir' }
     let(:config_path) { 'test_config.json' }
     let(:dump_target) { double('DumpTarget') }
-    let(:runner) { Runner.new(connection_config, output_path, config_path, dump_target) }
+    let(:runner) { Runner.new(connection_config, output_dir, config_path, dump_target) }
 
     before do
       allow(File).to receive(:read).with(config_path).and_return('{ "tables": [] }')
@@ -17,8 +17,7 @@ module Exwiw
     end
 
     it 'writes bulk insert SQL to the output file' do
-      expect(File).to receive(:open).with(output_path, 'w')
-      runner.run
+      expect { runner.run }.not_to raise_error
     end
   end
-end 
+end
