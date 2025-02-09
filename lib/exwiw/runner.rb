@@ -21,12 +21,12 @@ module Exwiw
         FileUtils.mkdir_p(@output_dir)
       end
 
-      ordered_table_names.each do |table_name|
+      ordered_table_names.each_with_index do |table_name, idx|
         query_ast = QueryAstBuilder.run(table_name, config.tables, @dump_target)
         results = adapter.execute(query_ast)
         insert_sql = adapter.to_bulk_insert(results, table_name)
 
-        File.open(File.join(@output_dir, "#{table_name}.sql"), 'w') do |file|
+        File.open(File.join(@output_dir, "#{idx.to_s.ljust(3, '0')}-#{table_name}.sql"), 'w') do |file|
           file.puts(insert_sql)
         end
       end
