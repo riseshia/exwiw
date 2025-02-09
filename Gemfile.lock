@@ -59,7 +59,7 @@ GEM
       rspec-support (~> 3.13.0)
     rspec-support (3.13.2)
     securerandom (0.4.1)
-    serdes (0.1.1)
+    serdes (0.1.2)
     sqlite3 (2.5.0)
       mini_portile2 (~> 2.8.0)
     sqlite3 (2.5.0-x86_64-linux-gnu)
