@@ -66,6 +66,12 @@ module Exwiw
           exit 1
         end
       end
+
+      valid_adapters = ["mysql2", "pg", "sqlite3"]
+      unless valid_adapters.include?(@database_adapter)
+        $stderr.puts "Invalid adapter. Available options are: #{valid_adapters.join(', ')}"
+        exit 1
+      end
     end
 
     private def parser
