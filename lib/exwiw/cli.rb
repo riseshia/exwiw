@@ -25,6 +25,8 @@ module Exwiw
       @config_path = "schema.json"
       @database_adapter = nil
       @database_name = nil
+      @target_table_name = nil
+      @ids = []
 
       parser.parse!(@argv)
     end
@@ -74,6 +76,16 @@ module Exwiw
         $stderr.puts "Invalid adapter. Available options are: #{valid_adapters.join(', ')}"
         exit 1
       end
+
+      if @target_table_name.nil? || @target_table_name.empty?
+        $stderr.puts "Target table is required"
+        exit 1
+      end
+
+      if @ids.empty?
+        $stderr.puts "At least one ID is required"
+        exit 1
+      end
     end
 
     private def parser
@@ -88,6 +100,8 @@ module Exwiw
         opts.on("-c", "--config=[CONFIG_FILE_PATH]", "Config file path. default is schema.json") { |v| @config_path = v }
         opts.on("-a", "--adapter=ADAPTER", "Database adapter") { |v| @database_adapter = v }
         opts.on("--database=DATABASE", "Target database name") { |v| @database_name = v }
+        opts.on("--target-table=TABLE", "Target table for extraction") { |v| @target_table_name = v }
+        opts.on("--ids=IDS", "Comma-separated list of identifiers") { |v| @ids = v.split(',') }
 
         opts.on("--help", "Print this help") do
           @help = true

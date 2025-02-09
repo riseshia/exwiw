@@ -49,6 +49,8 @@ exwiw \
   --user=reader \
   --database=app_production \
   --config=schema.json \
+  --target-table=shops \
+  --ids=1 \ # comma separated ids
   --output=dump.sql
 ```
 
