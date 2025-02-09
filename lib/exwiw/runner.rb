@@ -23,7 +23,7 @@ module Exwiw
 
       ordered_table_names.each do |table_name|
         query_ast = QueryAstBuilder.run(table_name, config.tables, @dump_target)
-        result = adapter.execute(query_ast)
+        results = adapter.execute(query_ast)
         insert_sql = adapter.to_bulk_insert(results, table_name)
 
         File.open(File.join(@output_dir, "#{table_name}.sql"), 'w') do |file|

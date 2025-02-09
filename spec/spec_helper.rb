@@ -39,5 +39,5 @@ end
 
 ActiveRecord::Base.establish_connection(
   adapter: "sqlite3",
-  database: ":memory:"
+  database: "tmp/test.sqlite3"
 )
