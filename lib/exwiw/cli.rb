@@ -21,7 +21,7 @@ module Exwiw
       @database_port = nil
       @database_user = nil
       @database_password = ENV["DATABASE_PASSWORD"]
-      @output = nil
+      @output = "dump.sql"
       @config_path = "schema.json"
 
       parser.parse!(@argv)
@@ -73,7 +73,7 @@ module Exwiw
         opts.on("-h", "--host=HOST", "Target database host") { |v| @database_host = v }
         opts.on("-p", "--port=PORT", "Target database port") { |v| @database_port = v }
         opts.on("-u", "--user=USERNAME", "Target database user") { |v| @database_user = v }
-        opts.on("-o", "--output=DUMP_FILE_PATH", "Output file path") { |v| @output = v }
+        opts.on("-o", "--output=DUMP_FILE_PATH", "Output file path. default is dump.sql") { |v| @output = v }
         opts.on("-c", "--config=[CONFIG_FILE_PATH]", "Config file path. default is schema.json") { |v| @config_path = v }
 
         opts.on("--help", "Print this help") do
