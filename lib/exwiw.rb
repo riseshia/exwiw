@@ -9,7 +9,6 @@ require_relative "exwiw/runner"
 require_relative "exwiw/belongs_to_relation"
 require_relative "exwiw/table_column"
 require_relative "exwiw/table"
-require_relative "exwiw/database"
 require_relative "exwiw/config"
 
 module Exwiw
