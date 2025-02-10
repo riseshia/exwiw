@@ -17,8 +17,8 @@ module Exwiw
 
       let(:simple_query_ast) do
         QueryAst::Select.new.tap do |ast|
-          ast.from("shops")
-          ast.select(["id", "name", "created_at", "updated_at"])
+          ast.from(shops_table.name)
+          ast.select(shops_table.columns)
           ast.where(
             QueryAst::WhereClause.new(
               column_name: "id",
@@ -31,8 +31,8 @@ module Exwiw
 
       let(:simple_query_ast2) do
         QueryAst::Select.new.tap do |ast|
-          ast.from("users")
-          ast.select(["id", "shop_id"])
+          ast.from(users_table.name)
+          ast.select(users_table.columns)
           ast.where(
             QueryAst::WhereClause.new(
               column_name: "shop_id",
@@ -45,8 +45,8 @@ module Exwiw
 
       let(:join_query_ast) do
         QueryAst::Select.new.tap do |ast|
-          ast.from("order_items")
-          ast.select(["id", "order_id"])
+          ast.from(order_items_table.name)
+          ast.select(order_items_table.columns)
           ast.join(
             QueryAst::JoinClause.new(
               base_table_name: "order_items",
@@ -87,7 +87,7 @@ module Exwiw
 
           it "builds sql" do
             expect(sql).to eq(
-              "SELECT order_items.id, order_items.order_id FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
+              "SELECT order_items.id, order_items.quantity, order_items.order_id, order_items.product_id, order_items.created_at, order_items.updated_at FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
             )
           end
         end
@@ -109,8 +109,8 @@ module Exwiw
 
           it "returns correct results" do
             expect(results).to eq([
-              [1, 1],
-              [2, 1],
+              [1, "User 1", "user1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [2, "User 2", "user2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
             ])
           end
         end
@@ -120,12 +120,12 @@ module Exwiw
 
           it "returns correct results" do
             expect(results).to eq([
-              [1, 1],
-              [2, 2],
-              [3, 3],
-              [4, 4],
-              [5, 5],
-              [6, 6],
+              [1, 1, 1, 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [2, 1, 2, 2, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [3, 1, 3, 3, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [4, 1, 4, 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [5, 1, 5, 2, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [6, 1, 6, 3, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
             ])
           end
         end
