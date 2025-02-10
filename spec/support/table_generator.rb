@@ -28,7 +28,7 @@ module TableGenerator
       columns: [
         Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
-        Exwiw::TableColumn.from_symbol_keys({ name: 'email' }),
+        Exwiw::TableColumn.from_symbol_keys({ name: 'email', replace_with: 'user{id}@example.com' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'shop_id' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'created_at' }),
         Exwiw::TableColumn.from_symbol_keys({ name: 'updated_at' }),

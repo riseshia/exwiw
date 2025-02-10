@@ -9,7 +9,9 @@ module Exwiw
         connection.execute(sql)
       end
 
-      def to_bulk_insert(results, table_name)
+      def to_bulk_insert(results, table)
+        table_name = table.name
+
         value_list = results.map do |row|
           quoted_values = row.map { |value| value.is_a?(String) ? "'#{value}'" : value }
           "(" + quoted_values.join(', ') + ")"

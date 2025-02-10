@@ -140,9 +140,7 @@ module Exwiw
           ]
         end
 
-        let(:table_name) { "shops" }
-
-        let(:bulk_insert_sql) { adapter.to_bulk_insert(results, table_name) }
+        let(:bulk_insert_sql) { adapter.to_bulk_insert(results, shops_table) }
 
         it "returns correct bulk insert sql" do
           expect(bulk_insert_sql.strip).to eq(<<~SQL.strip)
@@ -154,7 +152,7 @@ module Exwiw
         end
       end
 
-      describe "#to_bulk_insert" do
+      describe "#to_bulk_delete" do
         let(:results) do
           [
             [1, "Shop 1", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
@@ -162,8 +160,6 @@ module Exwiw
             [3, "Shop 3", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
           ]
         end
-
-        let(:table_name) { "shops" }
 
         let(:bulk_insert_sql) { adapter.to_bulk_delete(results, shops_table) }
 
