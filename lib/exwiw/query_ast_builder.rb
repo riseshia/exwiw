@@ -14,11 +14,11 @@ module Exwiw
       where_clauses = build_where_clauses(table, dump_target)
       join_clauses = build_join_clauses(table, table_by_name, dump_target)
 
-      QueryAst::Select.new.tap do |select|
-        select.from(table.name)
-        select.select(table.column_names)
-        join_clauses.each { |join_clause| select.join(join_clause) }
-        where_clauses.each { |where_clause| select.where(where_clause) }
+      QueryAst::Select.new.tap do |ast|
+        ast.from(table.name)
+        ast.select(table.column_names)
+        join_clauses.each { |join_clause| ast.join(join_clause) }
+        where_clauses.each { |where_clause| ast.where(where_clause) }
       end
     end
 
