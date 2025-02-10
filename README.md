@@ -90,16 +90,55 @@ bundle exec rake exwiw:schema:generate
             "name": "id",
         }, {
             "name": "email",
-            "mask": {
-                "type": "replaced_with",
-                "value": "user{id}@example.com"
-            }
+            "replace_with": "user{id}@example.com"
         }, {
             "name": "company_id"
         }]
     }]
 }
 ```
+
+### Masking
+
+`exwiw` provides several options for masking value.
+
+#### `replace_with`
+
+XXX: TODO
+
+It will replace the value with the specified string,
+and you can use the column name with `{}` to replace the value with the column value.
+
+For example, Let assume we have the record which id is 1,
+then "user{id}@example.com" will be replaced with "user1@example.com".
+
+#### `raw_sql`
+
+XXX: TODO
+
+It will used instead of the original value.
+
+For example, `"raw_sql": "CONCAT('user', shops.id, '@example.com')"` is equivalent to
+`"replace_with": "user{id}@example.com"`.
+This is useful when you want to transform with functions provided by the database.
+
+Notice that you are recommended to clearify table name of column to avoid ambiguity.
+
+#### `map`
+
+XXX: TODO
+
+Given value will be evaluated as Ruby code, and treated as the proc.
+
+```
+"map": "proc { |r| 'user' + v['id'].to_s + '@example.com' }"
+```
+
+which is equivalent to `"replace_with": "user{id}@example.com"`.
+
+Notice this is the most powerful option, but you should be careful to use this option.
+Because this transformation occured on exwiw process, so much slower than other options.
+Most of case, this option is not recommended.
 
 ## Development
 
