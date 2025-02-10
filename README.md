@@ -104,8 +104,6 @@ bundle exec rake exwiw:schema:generate
 
 #### `replace_with`
 
-XXX: TODO
-
 It will replace the value with the specified string,
 and you can use the column name with `{}` to replace the value with the column value.
 

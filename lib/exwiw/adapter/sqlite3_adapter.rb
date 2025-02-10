@@ -38,7 +38,7 @@ module Exwiw
         raise NotImplementedError unless query_ast.is_a?(Exwiw::QueryAst::Select)
 
         sql = "SELECT "
-        sql += query_ast.column_names.map { |col| "#{query_ast.from_table_name}.#{col}" }.join(', ')
+        sql += query_ast.columns.map { |col| compile_column_name(query_ast, col) }.join(', ')
         sql += " FROM #{query_ast.from_table_name}"
 
         query_ast.join_clauses.each do |join|
@@ -55,6 +55,19 @@ module Exwiw
         end
 
         sql
+      end
+
+      private def compile_column_name(ast, column)
+        if column.is_a?(Exwiw::QueryAst::ColumnValue::ReplaceWith)
+          replaced = column.value.gsub(/{[^}]+}/) do |m|
+            inject_name = m[1..-2]
+            "' || #{ast.from_table_name}.#{inject_name} || '"
+          end
+
+          "('#{replaced}')"
+        else
+          "#{ast.from_table_name}.#{column.value}"
+        end
       end
 
       private def connection

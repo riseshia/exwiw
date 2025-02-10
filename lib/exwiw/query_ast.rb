@@ -35,12 +35,18 @@ module Exwiw
       end
     end
 
+    module ColumnValue
+      Base = Struct.new(:name, :value, keyword_init: true)
+      Plain = Class.new(Base)
+      ReplaceWith = Class.new(Base)
+    end
+
     class Select
-      attr_reader :from_table_name, :column_names, :where_clauses, :join_clauses
+      attr_reader :from_table_name, :columns, :where_clauses, :join_clauses
 
       def initialize
         @from_table_name = nil
-        @column_names = nil
+        @columns = []
         @where_clauses = []
         @join_clauses = []
       end
@@ -49,8 +55,8 @@ module Exwiw
         @from_table_name = table
       end
 
-      def select(columns_clause)
-        @column_names = columns_clause
+      def select(columns)
+        @columns = map_column_value(columns)
       end
 
       def where(where_clause)
@@ -59,6 +65,16 @@ module Exwiw
 
       def join(join_clause)
         @join_clauses << join_clause
+      end
+
+      private def map_column_value(columns)
+        columns.map do |c|
+          if c.replace_with
+            QueryAst::ColumnValue::ReplaceWith.new(name: c.name, value: c.replace_with)
+          else
+            QueryAst::ColumnValue::Plain.new(name: c.name, value: c.name)
+          end
+        end
       end
     end
   end

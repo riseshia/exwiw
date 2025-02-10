@@ -24,7 +24,8 @@
     }, {
       "name": "name"
     }, {
-      "name": "email"
+      "name": "email",
+      "replace_with": "masked-{id}@example.com"
     }, {
       "name": "shop_id"
     }, {

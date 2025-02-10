@@ -29,7 +29,7 @@ module Exwiw
         end
       end
 
-      let(:simple_query_ast2) do
+      let(:replace_with_query_ast) do
         QueryAst::Select.new.tap do |ast|
           ast.from(users_table.name)
           ast.select(users_table.columns)
@@ -75,10 +75,10 @@ module Exwiw
         end
 
         context "simple select query2" do
-          let(:sql) { adapter.compile_ast(simple_query_ast2) }
+          let(:sql) { adapter.compile_ast(replace_with_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT users.id, users.shop_id FROM users WHERE users.shop_id = 1")
+            expect(sql).to eq("SELECT users.id, users.name, ('masked' || users.id || '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
           end
         end
 
@@ -104,13 +104,13 @@ module Exwiw
           end
         end
 
-        context "simple select query2" do
-          let(:results) { adapter.execute(simple_query_ast2) }
+        context "replace with select query" do
+          let(:results) { adapter.execute(replace_with_query_ast) }
 
           it "returns correct results" do
             expect(results).to eq([
-              [1, "User 1", "user1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [2, "User 2", "user2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [1, "User 1", "masked1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [2, "User 2", "masked2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
             ])
           end
         end

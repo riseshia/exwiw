@@ -18,12 +18,28 @@ RSpec.describe Exwiw::QueryAstBuilder do
     end
     let(:built_query_ast) { described_class.run(table.name, all_tables, dump_target) }
 
+    def simply_columns(columns)
+      columns.map do |c|
+        case c
+        when Exwiw::QueryAst::ColumnValue::Plain
+          { name: c.name }
+        when Exwiw::QueryAst::ColumnValue::ReplaceWith
+          { name: c.name, replace_with: c.value }
+        end
+      end
+    end
+
     context 'when the table is same as dump target table' do
       let(:table) { shops_table }
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('shops')
-        expect(built_query_ast.column_names).to eq(['id', 'name', 'created_at', 'updated_at'])
+        expect(simply_columns(built_query_ast.columns)).to eq([
+          { name: 'id' },
+          { name: 'name' },
+          { name: 'created_at' },
+          { name: 'updated_at' },
+        ])
         expect(built_query_ast.join_clauses).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
           { column_name: 'id', operator: :eq, value: [1] }
@@ -36,7 +52,14 @@ RSpec.describe Exwiw::QueryAstBuilder do
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('users')
-        expect(built_query_ast.column_names).to eq(['id', 'name', 'email', 'shop_id', 'created_at', 'updated_at'])
+        expect(simply_columns(built_query_ast.columns)).to eq([
+          { name: 'id' },
+          { name: 'name' },
+          { name: 'email', replace_with: 'masked{id}@example.com' },
+          { name: 'shop_id' },
+          { name: 'created_at' },
+          { name: 'updated_at' },
+        ])
         expect(built_query_ast.join_clauses.map(&:to_h)).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
           { column_name: 'shop_id', operator: :eq, value: [1] },
@@ -49,7 +72,14 @@ RSpec.describe Exwiw::QueryAstBuilder do
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('order_items')
-        expect(built_query_ast.column_names).to eq(['id', 'quantity', 'order_id', 'product_id', 'created_at', 'updated_at'])
+        expect(simply_columns(built_query_ast.columns)).to eq([
+          { name: 'id' },
+          { name: 'quantity' },
+          { name: 'order_id' },
+          { name: 'product_id' },
+          { name: 'created_at' },
+          { name: 'updated_at' },
+        ])
         expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
           base_table_name: 'order_items',
           foreign_key: 'order_id',
@@ -66,7 +96,14 @@ RSpec.describe Exwiw::QueryAstBuilder do
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('transactions')
-        expect(built_query_ast.column_names).to eq(['id', 'type', 'amount', 'order_id', 'created_at', 'updated_at'])
+        expect(simply_columns(built_query_ast.columns)).to eq([
+          { name: 'id' },
+          { name: 'type' },
+          { name: 'amount' },
+          { name: 'order_id' },
+          { name: 'created_at' },
+          { name: 'updated_at' },
+        ])
         expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
           base_table_name: 'transactions',
           foreign_key: 'order_id',
@@ -83,7 +120,13 @@ RSpec.describe Exwiw::QueryAstBuilder do
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('system_announcements')
-        expect(built_query_ast.column_names).to eq(['id', 'title', 'content', 'created_at', 'updated_at'])
+        expect(simply_columns(built_query_ast.columns)).to eq([
+          { name: 'id' },
+          { name: 'title' },
+          { name: 'content' },
+          { name: 'created_at' },
+          { name: 'updated_at' },
+        ])
         expect(built_query_ast.join_clauses).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([])
       end
