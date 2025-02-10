@@ -16,8 +16,14 @@ module Exwiw
     end
 
     # @params [Array<Array<String>>] array of rows
+    # @params [String] table_name
+    def to_bulk_insert(results, table_name)
+      raise NotImplementedError
+    end
+
+    # @params [Array<Array<String>>] array of rows
     # @params [Exwiw::Table] table
-    def to_bulk_insert(results, table)
+    def to_bulk_delete(results, table)
       raise NotImplementedError
     end
 

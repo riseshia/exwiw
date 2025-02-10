@@ -153,6 +153,27 @@ module Exwiw
           SQL
         end
       end
+
+      describe "#to_bulk_insert" do
+        let(:results) do
+          [
+            [1, "Shop 1", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            [2, "Shop 2", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            [3, "Shop 3", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+          ]
+        end
+
+        let(:table_name) { "shops" }
+
+        let(:bulk_insert_sql) { adapter.to_bulk_delete(results, shops_table) }
+
+        it "returns correct bulk delete sql" do
+          expect(bulk_insert_sql.strip).to eq(<<~SQL.strip)
+            DELETE FROM shops
+            WHERE id IN (1, 2, 3);
+          SQL
+        end
+      end
     end
   end
 end

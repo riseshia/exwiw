@@ -54,6 +54,18 @@ exwiw \
   --output-dir=dump
 ```
 
+This command will generate sql files in the `dump` directory.
+
+- `dump/insert-{idx}-{table_name}.sql`
+- `dump/delete-{idx}-{table_name}.sql`
+
+idx means the order of the dump. bigger idx might depend on smaller idx,
+so you should import the dump in order.
+
+you need to delete the records before importing the dump,
+`delete-{idx}-{table_name}.sql` will help you to do that.
+idx meaning is the same as insert sql.
+
 ### Generator
 
 the config generator is provided as Rake task.

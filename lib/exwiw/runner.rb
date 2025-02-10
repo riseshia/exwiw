@@ -21,13 +21,24 @@ module Exwiw
         FileUtils.mkdir_p(@output_dir)
       end
 
+      table_by_name = config.tables.each_with_object({}) { |table, hash| hash[table.name] = table }
+
+      total_size = ordered_table_names.size
       ordered_table_names.each_with_index do |table_name, idx|
         query_ast = QueryAstBuilder.run(table_name, config.tables, @dump_target)
         results = adapter.execute(query_ast)
-        insert_sql = adapter.to_bulk_insert(results, table_name)
 
-        File.open(File.join(@output_dir, "#{idx.to_s.rjust(3, '0')}-#{table_name}.sql"), 'w') do |file|
+        insert_sql = adapter.to_bulk_insert(results, table_name)
+        insert_idx = (idx + 1).to_s.rjust(3, '0')
+        File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.sql"), 'w') do |file|
           file.puts(insert_sql)
+        end
+
+        table = table_by_name.fetch(table_name)
+        delete_sql = adapter.to_bulk_delete(results, table)
+        delete_idx = (total_size - idx).to_s.rjust(3, '0')
+        File.open(File.join(@output_dir, "delete-#{delete_idx}-#{table_name}.sql"), 'w') do |file|
+          file.puts(delete_sql)
         end
       end
     end

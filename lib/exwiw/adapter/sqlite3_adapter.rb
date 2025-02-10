@@ -9,14 +9,27 @@ module Exwiw
         connection.execute(sql)
       end
 
-      def to_bulk_insert(results, table)
+      def to_bulk_insert(results, table_name)
         value_list = results.map do |row|
           quoted_values = row.map { |value| value.is_a?(String) ? "'#{value}'" : value }
           "(" + quoted_values.join(', ') + ")"
         end
         values = value_list.join(",\n")
 
-        "INSERT INTO #{table} VALUES\n#{values};"
+        "INSERT INTO #{table_name} VALUES\n#{values};"
+      end
+
+      def to_bulk_delete(results, table)
+        table_name = table.name
+        primary_key = table.primary_key
+        pk_idx = table.columns.find_index { |col| col.name == primary_key }
+
+        pk_ids = results.map { |row| row[pk_idx].is_a?(String) ? "'#{row[pk_idx]}'" : row[pk_idx] }
+
+        <<~SQL
+          DELETE FROM #{table_name}
+          WHERE #{primary_key} IN (#{pk_ids.join(', ')});
+        SQL
       end
 
       def compile_ast(query_ast)
