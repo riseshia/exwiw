@@ -15,25 +15,40 @@ module TableGenerator
     })
   end
 
-  def users_table
-    @users_table ||= Exwiw::Table.from_symbol_keys({
-      name: 'users',
-      primary_key: 'id',
-      belongs_tos: [
-        Exwiw::BelongsTo.from_symbol_keys({
-          foreign_key: 'shop_id',
-          table_name: 'shops'
-        }),
-      ],
-      columns: [
-        Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
-        Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
-        Exwiw::TableColumn.from_symbol_keys({ name: 'email', replace_with: 'masked{id}@example.com' }),
-        Exwiw::TableColumn.from_symbol_keys({ name: 'shop_id' }),
-        Exwiw::TableColumn.from_symbol_keys({ name: 'created_at' }),
-        Exwiw::TableColumn.from_symbol_keys({ name: 'updated_at' }),
-      ]
-    })
+  def users_table(masking_strategy: :replace_with)
+    @users_table_by_ms ||= {}
+    @users_table_by_ms[masking_strategy] ||=
+      begin
+        email_data =
+          case masking_strategy
+          when :replace_with
+            { name: 'email', replace_with: 'masked{id}@example.com' }
+          when :raw_sql
+            { name: 'email', raw_sql: "('rawsql' || users.id || '@example.com')" }
+          else
+            raise ArgumentError, "Unknown masking strategy: #{masking_strategy}"
+          end
+        pp email_data
+
+        Exwiw::Table.from_symbol_keys({
+          name: 'users',
+          primary_key: 'id',
+          belongs_tos: [
+            Exwiw::BelongsTo.from_symbol_keys({
+              foreign_key: 'shop_id',
+              table_name: 'shops'
+            }),
+          ],
+          columns: [
+            Exwiw::TableColumn.from_symbol_keys({ name: 'id' }),
+            Exwiw::TableColumn.from_symbol_keys({ name: 'name' }),
+            Exwiw::TableColumn.from_symbol_keys(email_data),
+            Exwiw::TableColumn.from_symbol_keys({ name: 'shop_id' }),
+            Exwiw::TableColumn.from_symbol_keys({ name: 'created_at' }),
+            Exwiw::TableColumn.from_symbol_keys({ name: 'updated_at' }),
+          ]
+        })
+      end
   end
 
   def products_table

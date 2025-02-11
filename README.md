@@ -112,8 +112,6 @@ then "user{id}@example.com" will be replaced with "user1@example.com".
 
 #### `raw_sql`
 
-XXX: TODO
-
 It will used instead of the original value.
 
 For example, `"raw_sql": "CONCAT('user', shops.id, '@example.com')"` is equivalent to
@@ -121,6 +119,8 @@ For example, `"raw_sql": "CONCAT('user', shops.id, '@example.com')"` is equivale
 This is useful when you want to transform with functions provided by the database.
 
 Notice that you are recommended to clearify table name of column to avoid ambiguity.
+
+If it used with `replace_with`, `replace_with` will be ignored.
 
 #### `map`
 

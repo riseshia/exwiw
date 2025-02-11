@@ -39,6 +39,7 @@ module Exwiw
       Base = Struct.new(:name, :value, keyword_init: true)
       Plain = Class.new(Base)
       ReplaceWith = Class.new(Base)
+      RawSql = Class.new(Base)
     end
 
     class Select
@@ -69,7 +70,9 @@ module Exwiw
 
       private def map_column_value(columns)
         columns.map do |c|
-          if c.replace_with
+          if c.raw_sql
+            QueryAst::ColumnValue::RawSql.new(name: c.name, value: c.raw_sql)
+          elsif c.replace_with
             QueryAst::ColumnValue::ReplaceWith.new(name: c.name, value: c.replace_with)
           else
             QueryAst::ColumnValue::Plain.new(name: c.name, value: c.name)

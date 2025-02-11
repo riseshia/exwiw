@@ -58,7 +58,12 @@ module Exwiw
       end
 
       private def compile_column_name(ast, column)
-        if column.is_a?(Exwiw::QueryAst::ColumnValue::ReplaceWith)
+        case column
+        when Exwiw::QueryAst::ColumnValue::Plain
+          "#{ast.from_table_name}.#{column.name}"
+        when Exwiw::QueryAst::ColumnValue::RawSql
+          column.value
+        when Exwiw::QueryAst::ColumnValue::ReplaceWith
           replaced = column.value.gsub(/{[^}]+}/) do |m|
             inject_name = m[1..-2]
             "' || #{ast.from_table_name}.#{inject_name} || '"
@@ -66,7 +71,7 @@ module Exwiw
 
           "('#{replaced}')"
         else
-          "#{ast.from_table_name}.#{column.value}"
+          raise "Unreachable case: #{column.inspect}"
         end
       end
 

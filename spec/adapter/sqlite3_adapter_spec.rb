@@ -43,6 +43,22 @@ module Exwiw
         end
       end
 
+      let(:raw_sql_query_ast) do
+        QueryAst::Select.new.tap do |ast|
+          table = users_table(masking_strategy: :raw_sql)
+
+          ast.from(table.name)
+          ast.select(table.columns)
+          ast.where(
+            QueryAst::WhereClause.new(
+              column_name: "shop_id",
+              operator: :eq,
+              value: [1],
+            )
+          )
+        end
+      end
+
       let(:join_query_ast) do
         QueryAst::Select.new.tap do |ast|
           ast.from(order_items_table.name)
@@ -111,6 +127,17 @@ module Exwiw
             expect(results).to eq([
               [1, "User 1", "masked1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
               [2, "User 2", "masked2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            ])
+          end
+        end
+
+        context "raw sql with select query" do
+          let(:results) { adapter.execute(raw_sql_query_ast) }
+
+          it "returns correct results" do
+            expect(results).to eq([
+              [1, "User 1", "rawsql1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+              [2, "User 2", "rawsql2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
             ])
           end
         end

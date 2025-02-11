@@ -30,6 +30,8 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: c.name }
         when Exwiw::QueryAst::ColumnValue::ReplaceWith
           { name: c.name, replace_with: c.value }
+        when Exwiw::QueryAst::ColumnValue::RawSql
+          { name: c.name, raw_sql: c.value }
         end
       end
     end
@@ -61,6 +63,37 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: 'id' },
           { name: 'name' },
           { name: 'email', replace_with: 'masked{id}@example.com' },
+          { name: 'shop_id' },
+          { name: 'created_at' },
+          { name: 'updated_at' },
+        ])
+        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([])
+        expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
+          { column_name: 'shop_id', operator: :eq, value: [1] },
+        ])
+      end
+    end
+
+    context 'when the table column has raw sql option' do
+      let(:all_tables) do # override table_by_name
+        [
+          table,
+          shops_table,
+          products_table,
+          orders_table,
+          order_items_table,
+          transactions_table,
+          system_announcements_table,
+        ]
+      end
+      let(:table) { users_table(masking_strategy: :raw_sql) }
+
+      it 'builds correct query ast' do
+        expect(built_query_ast.from_table_name).to eq('users')
+        expect(simply_columns(built_query_ast.columns)).to eq([
+          { name: 'id' },
+          { name: 'name' },
+          { name: 'email', raw_sql: "('rawsql' || users.id || '@example.com')" },
           { name: 'shop_id' },
           { name: 'created_at' },
           { name: 'updated_at' },
