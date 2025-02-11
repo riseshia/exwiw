@@ -18,7 +18,8 @@ module Exwiw
         end
         values = value_list.join(",\n")
 
-        "INSERT INTO #{table_name} VALUES\n#{values};"
+        column_names = table.columns.map(&:name).join(', ')
+        "INSERT INTO #{table_name} (#{column_names}) VALUES\n#{values};"
       end
 
       def to_bulk_delete(select_query_ast, table)
