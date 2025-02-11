@@ -159,6 +159,31 @@ module Exwiw
       end
 
       describe "#to_bulk_insert" do
+        context "simple select query" do
+          let(:sql) { adapter.compile_ast(simple_query_ast) }
+
+          it "builds sql" do
+            expect(sql).to eq("SELECT shops.id, shops.name, shops.created_at, shops.updated_at FROM shops WHERE shops.id = 1")
+          end
+        end
+
+        context "simple select query2" do
+          let(:sql) { adapter.compile_ast(replace_with_query_ast) }
+
+          it "builds sql" do
+            expect(sql).to eq("SELECT users.id, users.name, ('masked' || users.id || '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
+          end
+        end
+
+        context "select query with one join" do
+          let(:sql) { adapter.compile_ast(join_query_ast) }
+
+          it "builds sql" do
+            expect(sql).to eq(
+              "SELECT order_items.id, order_items.quantity, order_items.order_id, order_items.product_id, order_items.created_at, order_items.updated_at FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
+            )
+          end
+        end
         let(:results) do
           [
             [1, "Shop 1", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
@@ -180,21 +205,37 @@ module Exwiw
       end
 
       describe "#to_bulk_delete" do
-        let(:results) do
-          [
-            [1, "Shop 1", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-            [2, "Shop 2", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-            [3, "Shop 3", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-          ]
+        context "simple select query" do
+          let(:bulk_delete_sql) { adapter.to_bulk_delete(simple_query_ast, shops_table) }
+
+          it "builds sql" do
+            expect(bulk_delete_sql.strip).to eq(<<~SQL.strip)
+              DELETE FROM shops
+              WHERE shops.id = 1;
+            SQL
+          end
         end
 
-        let(:bulk_insert_sql) { adapter.to_bulk_delete(results, shops_table) }
+        context "simple select query2" do
+          let(:bulk_delete_sql) { adapter.to_bulk_delete(replace_with_query_ast, users_table) }
 
-        it "returns correct bulk delete sql" do
-          expect(bulk_insert_sql.strip).to eq(<<~SQL.strip)
-            DELETE FROM shops
-            WHERE id IN (1, 2, 3);
-          SQL
+          it "builds sql" do
+            expect(bulk_delete_sql.strip).to eq(<<~SQL.strip)
+              DELETE FROM users
+              WHERE users.shop_id = 1;
+            SQL
+          end
+        end
+
+        context "select query with one join" do
+          let(:bulk_delete_sql) { adapter.to_bulk_delete(join_query_ast, order_items_table) }
+
+          it "builds sql" do
+            expect(bulk_delete_sql.strip).to eq(<<~SQL.strip)
+              DELETE FROM order_items
+              WHERE order_items.order_id IN (SELECT orders.id FROM orders WHERE orders.shop_id = 1);
+            SQL
+          end
         end
       end
     end

@@ -21,9 +21,9 @@ module Exwiw
       raise NotImplementedError
     end
 
-    # @params [Array<Array<String>>] array of rows
+    # @params [Exwiw::QueryAst] select_query_ast
     # @params [Exwiw::Table] table
-    def to_bulk_delete(results, table)
+    def to_bulk_delete(select_query_ast, table)
       raise NotImplementedError
     end
 

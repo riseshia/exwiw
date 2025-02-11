@@ -28,7 +28,6 @@ module TableGenerator
           else
             raise ArgumentError, "Unknown masking strategy: #{masking_strategy}"
           end
-        pp email_data
 
         Exwiw::Table.from_symbol_keys({
           name: 'users',

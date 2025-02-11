@@ -36,7 +36,7 @@ module Exwiw
           file.puts(insert_sql)
         end
 
-        delete_sql = adapter.to_bulk_delete(results, table)
+        delete_sql = adapter.to_bulk_delete(query_ast, table)
         delete_idx = (total_size - idx).to_s.rjust(3, '0')
         File.open(File.join(@output_dir, "delete-#{delete_idx}-#{table_name}.sql"), 'w') do |file|
           file.puts(delete_sql)
