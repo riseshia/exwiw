@@ -35,6 +35,10 @@ If bundler is not being used to manage dependencies, install the gem by executin
 gem install exwiw
 ```
 
+## Supported Databases
+
+- sqlite3
+
 ## Usage
 
 ### Command
@@ -64,6 +68,7 @@ so you should import the dump in order.
 
 you need to delete the records before importing the dump,
 `delete-{idx}-{table_name}.sql` will help you to do that.
+This sql will delete "all" related records to the extract targets.
 idx meaning is the same as insert sql.
 
 ### Generator
@@ -137,6 +142,17 @@ which is equivalent to `"replace_with": "user{id}@example.com"`.
 Notice this is the most powerful option, but you should be careful to use this option.
 Because this transformation occured on exwiw process, so much slower than other options.
 Most of case, this option is not recommended.
+
+## How it works
+
+- Load the table information from the specified config file.
+- Calculate the dependency between tables.
+- Generate the full list of INSERT sql based on the specified conditions.
+  - If the processing table has no relation with target tables, then dump all records.
+  - If the processing table has relation with target tables, then dump the records which are related to the target tables.
+- Generate the full list of DELETE sql based on the specified conditions.
+  - If the processing table has no relation with target tables, then delete all records.
+  - If the processing table has relation with target tables, then delete the records which are related to the target tables.
 
 ## Development
 
