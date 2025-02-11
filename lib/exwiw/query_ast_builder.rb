@@ -4,11 +4,7 @@ module Exwiw
   module QueryAstBuilder
     module_function
 
-    def run(table_name, all_tables, dump_target)
-      table_by_name = all_tables.each_with_object({}) do |table, acc|
-        acc[table.name] = table
-      end
-
+    def run(table_name, table_by_name, dump_target)
       table = table_by_name.fetch(table_name)
 
       where_clauses = build_where_clauses(table, dump_target)

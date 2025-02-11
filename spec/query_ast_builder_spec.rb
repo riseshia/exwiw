@@ -16,7 +16,12 @@ RSpec.describe Exwiw::QueryAstBuilder do
         system_announcements_table,
       ]
     end
-    let(:built_query_ast) { described_class.run(table.name, all_tables, dump_target) }
+    let(:table_by_name) do
+      all_tables.each_with_object({}) do |table, hash|
+        hash[table.name] = table
+      end
+    end
+    let(:built_query_ast) { described_class.run(table.name, table_by_name, dump_target) }
 
     def simply_columns(columns)
       columns.map do |c|

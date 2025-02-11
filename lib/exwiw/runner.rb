@@ -27,7 +27,7 @@ module Exwiw
       ordered_table_names.each_with_index do |table_name, idx|
         table = table_by_name.fetch(table_name)
 
-        query_ast = QueryAstBuilder.run(table.name, config.tables, @dump_target)
+        query_ast = QueryAstBuilder.run(table.name, table_by_name, @dump_target)
         results = adapter.execute(query_ast)
 
         insert_sql = adapter.to_bulk_insert(results, table)
