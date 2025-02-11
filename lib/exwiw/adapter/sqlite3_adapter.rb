@@ -116,12 +116,17 @@ module Exwiw
         when Exwiw::QueryAst::ColumnValue::RawSql
           column.value
         when Exwiw::QueryAst::ColumnValue::ReplaceWith
-          replaced = column.value.gsub(/{[^}]+}/) do |m|
-            inject_name = m[1..-2]
-            "' || #{ast.from_table_name}.#{inject_name} || '"
+          parts = column.value.scan(/[^{}]+|\{[^{}]*\}/).map do |part|
+            if part.start_with?('{')
+              name = part[1..-2]
+              "#{ast.from_table_name}.#{name}"
+            else
+              "'#{part}'"
+            end
           end
 
-          "('#{replaced}')"
+          replaced = parts.join(" || ")
+          "(#{replaced})"
         else
           raise "Unreachable case: #{column.inspect}"
         end
