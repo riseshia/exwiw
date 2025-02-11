@@ -51,6 +51,7 @@ module BootstrapDatabases
     conn.exec("DROP DATABASE IF EXISTS #{database_name}")
     conn.exec("CREATE DATABASE #{database_name}")
 
-    system("docker compose exec postgres psql -U postgres -d '#{database_name}' -f seed/postgresql-dump.sql > /dev/null")
+    ret = system("docker compose exec postgres psql -U postgres -d '#{database_name}' -f /seed/postgresql-dump.sql > /dev/null")
+    raise "Failed to setup postgres database" unless ret
   end
 end

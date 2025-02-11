@@ -33,6 +33,8 @@ module Exwiw
         Adapter::Sqlite3Adapter.new(connection_config)
       when 'mysql2'
         Adapter::Mysql2Adapter.new(connection_config)
+      when 'postgresql'
+        Adapter::PostgresqlAdapter.new(connection_config)
       else
         raise 'Unsupported adapter'
       end

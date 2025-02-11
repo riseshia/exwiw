@@ -38,6 +38,7 @@ gem install exwiw
 ## Supported Databases
 
 - mysql2
+- postgresql
 - sqlite3
 
 ## Usage

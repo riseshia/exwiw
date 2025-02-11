@@ -75,7 +75,7 @@ module Exwiw
         end
       end
 
-      valid_adapters = ["mysql2", "pg", "sqlite3"]
+      valid_adapters = ["mysql2", "postgresql", "sqlite3"]
       unless valid_adapters.include?(@database_adapter)
         $stderr.puts "Invalid adapter. Available options are: #{valid_adapters.join(', ')}"
         exit 1
