@@ -3,9 +3,7 @@ services:
     image: mysql:9
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: test_db
-      MYSQL_USER: test_user
-      MYSQL_PASSWORD: test_password
+      MYSQL_DATABASE: exwiw_test
     ports:
       - "3306:3306"
     volumes:
@@ -14,9 +12,10 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: test_db
-      POSTGRES_USER: test_user
+      POSTGRES_DB: exwiw_test
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test_password
+      PGPASSWORD: test_password
     ports:
       - "5432:5432"
     volumes:

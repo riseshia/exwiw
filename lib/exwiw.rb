@@ -2,6 +2,7 @@
 
 require_relative "exwiw/version"
 
+require "json"
 require "serdes"
 
 require_relative "exwiw/adapter"

@@ -9,8 +9,8 @@ gem "rake"
 
 gem "rspec"
 
-gem "sqlite3"
-gem "pg"
 gem "mysql2"
+gem "pg"
+gem "sqlite3"
+
 gem "activerecord"
-gem "database_cleaner-active_record"
