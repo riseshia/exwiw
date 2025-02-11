@@ -34,7 +34,8 @@ module BootstrapDatabases
     conn.query("DROP DATABASE IF EXISTS #{database_name}")
     conn.query("CREATE DATABASE #{database_name}")
 
-    system("docker compose exec -T mysql mysql -u #{username} #{database_name} < seed/mysql2-dump.sql")
+    ret = system("docker compose exec -T mysql mysql -u #{username} #{database_name} < seed/mysql2-dump.sql")
+    raise "Failed to setup mysql2 database" unless ret
   end
 
   private def setup_postgres
