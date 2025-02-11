@@ -401,7 +401,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY public.ar_internal_metadata (key, value, created_at, updated_at) FROM stdin;
-environment	default_env	2025-02-11 04:34:32.943595	2025-02-11 04:34:32.943598
+environment	default_env	2025-02-11 05:56:27.063537	2025-02-11 05:56:27.063541
 \.
 
 
@@ -509,36 +509,6 @@ COPY public.products (id, name, price, shop_id, created_at, updated_at) FROM std
 --
 
 COPY public.reviews (id, reviewable_type, reviewable_id, user_id, rating, content, created_at, updated_at) FROM stdin;
-1	Product	1	1	3	Review for Product 1 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-2	Product	2	1	2	Review for Product 2 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-3	Product	3	1	4	Review for Product 3 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-4	Product	1	2	5	Review for Product 1 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-5	Product	2	2	2	Review for Product 2 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-6	Product	3	2	3	Review for Product 3 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-7	Product	4	3	4	Review for Product 1 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-8	Product	5	3	1	Review for Product 2 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-9	Product	6	3	5	Review for Product 3 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-10	Product	4	4	1	Review for Product 1 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-11	Product	5	4	5	Review for Product 2 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-12	Product	6	4	5	Review for Product 3 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-13	Product	7	5	5	Review for Product 1 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-14	Product	8	5	3	Review for Product 2 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-15	Product	9	5	3	Review for Product 3 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-16	Product	7	6	4	Review for Product 1 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-17	Product	8	6	2	Review for Product 2 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-18	Product	9	6	3	Review for Product 3 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-19	Product	10	7	1	Review for Product 1 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-20	Product	11	7	2	Review for Product 2 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-21	Product	12	7	5	Review for Product 3 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-22	Product	10	8	5	Review for Product 1 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-23	Product	11	8	3	Review for Product 2 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-24	Product	12	8	4	Review for Product 3 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-25	Product	13	9	5	Review for Product 1 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-26	Product	14	9	5	Review for Product 2 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-27	Product	15	9	5	Review for Product 3 by User 1	2025-01-01 00:00:00	2025-01-01 00:00:00
-28	Product	13	10	1	Review for Product 1 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-29	Product	14	10	1	Review for Product 2 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
-30	Product	15	10	5	Review for Product 3 by User 2	2025-01-01 00:00:00	2025-01-01 00:00:00
 \.
 
 
@@ -568,9 +538,9 @@ COPY public.shops (id, name, created_at, updated_at) FROM stdin;
 --
 
 COPY public.system_announcements (id, title, content, created_at, updated_at) FROM stdin;
-1	Announcement 1	This is the content of announcement 1.	2025-02-11 04:34:34.132767	2025-02-11 04:34:34.132767
-2	Announcement 2	This is the content of announcement 2.	2025-02-11 04:34:34.135884	2025-02-11 04:34:34.135884
-3	Announcement 3	This is the content of announcement 3.	2025-02-11 04:34:34.138136	2025-02-11 04:34:34.138136
+1	Announcement 1	This is the content of announcement 1.	2025-01-01 00:00:00	2025-01-01 00:00:00
+2	Announcement 2	This is the content of announcement 2.	2025-01-01 00:00:00	2025-01-01 00:00:00
+3	Announcement 3	This is the content of announcement 3.	2025-01-01 00:00:00	2025-01-01 00:00:00
 \.
 
 
@@ -655,7 +625,7 @@ SELECT pg_catalog.setval('public.products_id_seq', 15, true);
 -- Name: reviews_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.reviews_id_seq', 30, true);
+SELECT pg_catalog.setval('public.reviews_id_seq', 1, false);
 
 
 --

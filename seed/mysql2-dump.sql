@@ -37,7 +37,7 @@ CREATE TABLE `ar_internal_metadata` (
 
 LOCK TABLES `ar_internal_metadata` WRITE;
 /*!40000 ALTER TABLE `ar_internal_metadata` DISABLE KEYS */;
-INSERT INTO `ar_internal_metadata` VALUES ('environment','default_env','2025-02-11 04:34:29.224162','2025-02-11 04:34:29.224166');
+INSERT INTO `ar_internal_metadata` VALUES ('environment','default_env','2025-02-11 05:56:23.608849','2025-02-11 05:56:23.608852');
 /*!40000 ALTER TABLE `ar_internal_metadata` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -154,7 +154,7 @@ CREATE TABLE `reviews` (
   KEY `index_reviews_on_reviewable` (`reviewable_type`,`reviewable_id`),
   KEY `index_reviews_on_user_id` (`user_id`),
   CONSTRAINT `fk_rails_74a66bd6c5` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,7 +163,6 @@ CREATE TABLE `reviews` (
 
 LOCK TABLES `reviews` WRITE;
 /*!40000 ALTER TABLE `reviews` DISABLE KEYS */;
-INSERT INTO `reviews` VALUES (1,'Product',1,1,1,'Review for Product 1 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(2,'Product',2,1,1,'Review for Product 2 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(3,'Product',3,1,1,'Review for Product 3 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(4,'Product',1,2,5,'Review for Product 1 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(5,'Product',2,2,3,'Review for Product 2 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(6,'Product',3,2,3,'Review for Product 3 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(7,'Product',4,3,1,'Review for Product 1 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(8,'Product',5,3,3,'Review for Product 2 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(9,'Product',6,3,4,'Review for Product 3 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(10,'Product',4,4,2,'Review for Product 1 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(11,'Product',5,4,5,'Review for Product 2 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(12,'Product',6,4,5,'Review for Product 3 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(13,'Product',7,5,4,'Review for Product 1 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(14,'Product',8,5,1,'Review for Product 2 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(15,'Product',9,5,1,'Review for Product 3 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(16,'Product',7,6,1,'Review for Product 1 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(17,'Product',8,6,2,'Review for Product 2 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(18,'Product',9,6,5,'Review for Product 3 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(19,'Product',10,7,3,'Review for Product 1 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(20,'Product',11,7,4,'Review for Product 2 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(21,'Product',12,7,3,'Review for Product 3 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(22,'Product',10,8,5,'Review for Product 1 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(23,'Product',11,8,3,'Review for Product 2 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(24,'Product',12,8,2,'Review for Product 3 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(25,'Product',13,9,4,'Review for Product 1 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(26,'Product',14,9,1,'Review for Product 2 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(27,'Product',15,9,4,'Review for Product 3 by User 1','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(28,'Product',13,10,4,'Review for Product 1 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(29,'Product',14,10,4,'Review for Product 2 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(30,'Product',15,10,3,'Review for Product 3 by User 2','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000');
 /*!40000 ALTER TABLE `reviews` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -238,7 +237,7 @@ CREATE TABLE `system_announcements` (
 
 LOCK TABLES `system_announcements` WRITE;
 /*!40000 ALTER TABLE `system_announcements` DISABLE KEYS */;
-INSERT INTO `system_announcements` VALUES (1,'Announcement 1','This is the content of announcement 1.','2025-02-11 04:34:31.401428','2025-02-11 04:34:31.401428'),(2,'Announcement 2','This is the content of announcement 2.','2025-02-11 04:34:31.419298','2025-02-11 04:34:31.419298'),(3,'Announcement 3','This is the content of announcement 3.','2025-02-11 04:34:31.430325','2025-02-11 04:34:31.430325');
+INSERT INTO `system_announcements` VALUES (1,'Announcement 1','This is the content of announcement 1.','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(2,'Announcement 2','This is the content of announcement 2.','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000'),(3,'Announcement 3','This is the content of announcement 3.','2025-01-01 00:00:00.000000','2025-01-01 00:00:00.000000');
 /*!40000 ALTER TABLE `system_announcements` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -311,4 +310,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-02-11  4:34:31
+-- Dump completed on 2025-02-11  5:56:25

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 TARGET_DB_PATH="tmp/scenario-target.sqlite3"
 NEW_DB_PATH="tmp/scenario-target.sqlite3"
 

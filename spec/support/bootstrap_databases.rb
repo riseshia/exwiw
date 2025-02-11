@@ -29,13 +29,12 @@ module BootstrapDatabases
     mysql2_config = database_config("mysql2")
     database_name = mysql2_config.fetch(:database)
     username = mysql2_config.fetch(:username)
-    password = mysql2_config.fetch(:password)
 
     conn = Mysql2::Client.new(mysql2_config.except(:database))
     conn.query("DROP DATABASE IF EXISTS #{database_name}")
     conn.query("CREATE DATABASE #{database_name}")
 
-    system("docker compose exec -T mysql mysql -u #{username} -p'#{password}' #{database_name} < seed/mysql2-dump.sql")
+    system("docker compose exec -T mysql mysql -u #{username} #{database_name} < seed/mysql2-dump.sql")
   end
 
   private def setup_postgres

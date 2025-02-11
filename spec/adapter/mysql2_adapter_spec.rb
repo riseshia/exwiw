@@ -2,18 +2,18 @@
 
 module Exwiw
   module Adapter
-    RSpec.describe Sqlite3Adapter do
+    RSpec.describe Mysql2Adapter do
       let(:connection_config) do
         ConnectionConfig.new(
-          adapter: 'sqlite3',
-          database_name: 'tmp/test.sqlite3',
-          host: nil,
-          port: nil,
-          user: nil,
-          password: nil,
+          adapter: 'mysql2',
+          database_name: 'exwiw_test',
+          host: '127.0.0.1',
+          port: 3306,
+          user: 'root',
+          password: 'rootpassword',
         )
       end
-      let(:adapter) { Sqlite3Adapter.new(connection_config) }
+      let(:adapter) { described_class.new(connection_config) }
 
       let(:simple_query_ast) do
         QueryAst::Select.new.tap do |ast|
@@ -45,7 +45,7 @@ module Exwiw
 
       let(:raw_sql_query_ast) do
         QueryAst::Select.new.tap do |ast|
-          table = users_table(masking_strategy: :raw_sql)
+          table = users_table_with_mysql(masking_strategy: :raw_sql)
 
           ast.from(table.name)
           ast.select(table.columns)
@@ -94,7 +94,7 @@ module Exwiw
           let(:sql) { adapter.compile_ast(replace_with_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT users.id, users.name, ('masked' || users.id || '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
+            expect(sql).to eq("SELECT users.id, users.name, CONCAT('masked', users.id, '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
           end
         end
 
@@ -114,8 +114,8 @@ module Exwiw
           let(:results) { adapter.execute(simple_query_ast) }
 
           it "returns correct results" do
-            expect(results).to eq([
-              [1, "Shop 1", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            expect(results.to_a).to eq([
+              ["1", "Shop 1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
           end
         end
@@ -124,9 +124,9 @@ module Exwiw
           let(:results) { adapter.execute(replace_with_query_ast) }
 
           it "returns correct results" do
-            expect(results).to eq([
-              [1, "User 1", "masked1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [2, "User 2", "masked2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            expect(results.to_a).to eq([
+              ["1", "User 1", "masked1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["2", "User 2", "masked2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
           end
         end
@@ -135,9 +135,9 @@ module Exwiw
           let(:results) { adapter.execute(raw_sql_query_ast) }
 
           it "returns correct results" do
-            expect(results).to eq([
-              [1, "User 1", "rawsql1@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [2, "User 2", "rawsql2@example.com", 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            expect(results.to_a).to eq([
+              ["1", "User 1", "rawsql1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["2", "User 2", "rawsql2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
           end
         end
@@ -146,13 +146,13 @@ module Exwiw
           let(:results) { adapter.execute(join_query_ast) }
 
           it "returns correct results" do
-            expect(results).to eq([
-              [1, 1, 1, 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [2, 1, 2, 2, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [3, 1, 3, 3, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [4, 1, 4, 1, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [5, 1, 5, 2, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-              [6, 1, 6, 3, "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            expect(results.to_a).to eq([
+              ["1", "1", "1", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["3", "1", "3", "3", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["4", "1", "4", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["5", "1", "5", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["6", "1", "6", "3", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
           end
         end
@@ -171,7 +171,7 @@ module Exwiw
           let(:sql) { adapter.compile_ast(replace_with_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT users.id, users.name, ('masked' || users.id || '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
+            expect(sql).to eq("SELECT users.id, users.name, CONCAT('masked', users.id, '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
           end
         end
 

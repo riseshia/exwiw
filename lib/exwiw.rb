@@ -7,6 +7,7 @@ require "serdes"
 
 require_relative "exwiw/adapter"
 require_relative "exwiw/adapter/sqlite3_adapter"
+require_relative "exwiw/adapter/mysql2_adapter"
 require_relative "exwiw/determine_table_processing_order"
 require_relative "exwiw/query_ast"
 require_relative "exwiw/query_ast_builder"

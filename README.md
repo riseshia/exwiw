@@ -37,6 +37,7 @@ gem install exwiw
 
 ## Supported Databases
 
+- mysql2
 - sqlite3
 
 ## Usage
