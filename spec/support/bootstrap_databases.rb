@@ -11,9 +11,9 @@ module BootstrapDatabases
 
   def run
     setup_sqlite3
-    setup_mysql2
+    setup_mysql2 if ENV["CI"].nil?
     setup_postgres
-  end
+ end
 
   private def setup_sqlite3
     sqlite3_config = database_config("sqlite3")

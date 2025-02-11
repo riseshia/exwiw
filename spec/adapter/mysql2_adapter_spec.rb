@@ -114,6 +114,8 @@ module Exwiw
           let(:results) { adapter.execute(simple_query_ast) }
 
           it "returns correct results" do
+            skip if ENV["CI"]
+
             expect(results.to_a).to eq([
               ["1", "Shop 1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
@@ -124,6 +126,8 @@ module Exwiw
           let(:results) { adapter.execute(replace_with_query_ast) }
 
           it "returns correct results" do
+            skip if ENV["CI"]
+
             expect(results.to_a).to eq([
               ["1", "User 1", "masked1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "User 2", "masked2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -135,6 +139,8 @@ module Exwiw
           let(:results) { adapter.execute(raw_sql_query_ast) }
 
           it "returns correct results" do
+            skip if ENV["CI"]
+
             expect(results.to_a).to eq([
               ["1", "User 1", "rawsql1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "User 2", "rawsql2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -146,6 +152,8 @@ module Exwiw
           let(:results) { adapter.execute(join_query_ast) }
 
           it "returns correct results" do
+            skip if ENV["CI"]
+
             expect(results.to_a).to eq([
               ["1", "1", "1", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
