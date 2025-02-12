@@ -7,6 +7,8 @@ module Exwiw
     # @param tables [Array<Exwiw::Table>] tables
     # @return [Array<String>] sorted table names
     def run(tables)
+      return tables.map(&:name) if tables.size < 2
+
       ordered_table_names = []
 
       table_by_name = tables.each_with_object({}) do |table, acc|
