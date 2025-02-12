@@ -9,10 +9,11 @@ namespace :exwiw do
 
       Rails.application.eager_load!
 
-      tables = []
+      table_by_name = {}
 
       ActiveRecord::Base.descendants.each do |model|
         next if model.abstract_class?
+        next if table_by_name[model.table_name]
 
         belongs_tos = model.reflect_on_all_associations(:belongs_to).map do |assoc|
           if assoc.polymorphic?
@@ -30,13 +31,16 @@ namespace :exwiw do
           Exwiw::TableColumn.from_symbol_keys({ name: name })
         end
 
-        tables << Exwiw::Table.from_symbol_keys({
+        table = Exwiw::Table.from_symbol_keys({
           name: model.table_name,
           primary_key: model.primary_key,
           belongs_tos: belongs_tos.compact,
           columns: columns,
         })
+        table_by_name[table.name] = table
       end
+
+      tables = table_by_name.values.sort_by! { |table| table.name }
 
       config = Exwiw::Config.from_symbol_keys({ tables: tables })
 
