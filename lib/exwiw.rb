@@ -18,6 +18,13 @@ require_relative "exwiw/table_column"
 require_relative "exwiw/table"
 require_relative "exwiw/config"
 
+begin
+  require 'rails'
+rescue LoadError
+else
+  require 'exwiw/railtie'
+end
+
 module Exwiw
   DumpTarget = Struct.new(:table_name, :ids, keyword_init: true)
   ConnectionConfig = Struct.new(:adapter, :host, :port, :user, :password, :database_name, keyword_init: true)

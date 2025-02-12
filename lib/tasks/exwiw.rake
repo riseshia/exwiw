@@ -33,14 +33,14 @@ namespace :exwiw do
         tables << Exwiw::Table.from_symbol_keys({
           name: model.table_name,
           primary_key: model.primary_key,
-          belongs_tos: belongs_tos,
+          belongs_tos: belongs_tos.compact,
           columns: columns,
         })
       end
 
       config = Exwiw::Config.from_symbol_keys({ tables: tables })
 
-      File.write("schema.json", config.to_hash)
+      File.write("schema.json", JSON.pretty_generate(config.to_hash))
     end
   end
 end
