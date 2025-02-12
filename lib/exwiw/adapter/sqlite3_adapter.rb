@@ -13,7 +13,16 @@ module Exwiw
         table_name = table.name
 
         value_list = results.map do |row|
-          quoted_values = row.map { |value| value.is_a?(String) ? "'#{value}'" : value }
+          quoted_values = row.map do |value|
+            case value
+            when nil
+              "NULL"
+            when String
+              "'#{value}'"
+            else
+              value
+            end
+          end
           "(" + quoted_values.join(', ') + ")"
         end
         values = value_list.join(",\n")
