@@ -30,6 +30,8 @@ module Exwiw
         query_ast = QueryAstBuilder.run(table.name, table_by_name, @dump_target)
         results = adapter.execute(query_ast)
 
+        next if results.empty?
+
         insert_sql = adapter.to_bulk_insert(results, table)
         insert_idx = (idx + 1).to_s.rjust(3, '0')
         File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.sql"), 'w') do |file|
