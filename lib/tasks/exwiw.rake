@@ -6,6 +6,7 @@ namespace :exwiw do
     task generate: :environment do
       require "json"
       require "exwiw"
+      require "fileutils"
 
       Rails.application.eager_load!
 
@@ -40,11 +41,14 @@ namespace :exwiw do
         table_by_name[table.name] = table
       end
 
-      tables = table_by_name.values.sort_by! { |table| table.name }
+      tables = table_by_name.values
 
-      config = Exwiw::Config.from_symbol_keys({ tables: tables })
+      FileUtils.mkdir_p("exwiw")
 
-      File.write("schema.json", JSON.pretty_generate(config.to_hash))
+      tables.each do |table|
+        path = File.join("exwiw", "#{table.name}.json")
+        File.write(path, JSON.pretty_generate(table.to_hash))
+      end
     end
   end
 end

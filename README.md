@@ -79,7 +79,7 @@ idx meaning is the same as insert sql.
 the config generator is provided as Rake task.
 
 ```bash
-# generate schema.json
+# generate table schema under exwiw/
 bundle exec rake exwiw:schema:generate
 ```
 
