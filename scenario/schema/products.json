@@ -1,0 +1,21 @@
+{
+  "name": "products",
+  "primary_key": "id",
+  "belongs_tos": [{
+    "table_name": "shops",
+    "foreign_key": "shop_id"
+  }],
+  "columns": [{
+    "name": "id"
+  }, {
+  "name": "name"
+  }, {
+  "name": "price"
+  }, {
+  "name": "shop_id"
+  }, {
+  "name": "updated_at"
+  }, {
+  "name": "created_at"
+  }]
+}

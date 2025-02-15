@@ -4,7 +4,7 @@ module Exwiw
   module DetermineTableProcessingOrder
     module_function
 
-    # @param tables [Array<Exwiw::Table>] tables
+    # @param tables [Array<Exwiw::TableConfig>] tables
     # @return [Array<String>] sorted table names
     def run(tables)
       return tables.map(&:name) if tables.size < 2

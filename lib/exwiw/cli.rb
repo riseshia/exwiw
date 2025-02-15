@@ -23,7 +23,7 @@ module Exwiw
       @database_user = nil
       @database_password = ENV["DATABASE_PASSWORD"]
       @output_dir = "dump"
-      @config_path = "schema.json"
+      @config_dir = nil
       @database_adapter = nil
       @database_name = nil
       @target_table_name = nil
@@ -58,7 +58,7 @@ module Exwiw
         Runner.new(
           connection_config: connection_config,
           output_dir: @output_dir,
-          config_path: @config_path,
+          config_dir: @config_dir,
           dump_target: dump_target,
           logger: logger,
         ).run
@@ -72,6 +72,7 @@ module Exwiw
           "Target database port" => @database_port,
           "Database user" => @database_user,
           "Target database name" => @database_name,
+          "Config dir" => @config_dir,
         }.each do |k, v|
           if v.nil?
             $stderr.puts "#{k} is required"
@@ -128,7 +129,9 @@ module Exwiw
         opts.on("-o", "--output-dir=[DUMP_DIR_PATH]", "Output file path. default is dump/") do |v|
           @output_dir = v.end_with?("/") ? v[0..-2] : v
         end
-        opts.on("-c", "--config=[CONFIG_FILE_PATH]", "Config file path. default is schema.json") { |v| @config_path = v }
+        opts.on("-c", "--config-dir=CONFIG_DIR_PATH", "Config dir path.") do |v|
+          @config_dir = v.end_with?("/") ? v[0..-2] : v
+        end
         opts.on("-a", "--adapter=ADAPTER", "Database adapter") { |v| @database_adapter = v }
         opts.on("--database=DATABASE", "Target database name") { |v| @database_name = v }
         opts.on("--target-table=TABLE", "Target table for extraction") { |v| @target_table_name = v }

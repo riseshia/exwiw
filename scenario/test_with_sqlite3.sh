@@ -17,7 +17,7 @@ cp scenario/initdb/init.sqlite3 $NEW_DB_PATH
 bundle exec exe/exwiw \
   --adapter=sqlite3 \
   --database="${TARGET_DB_PATH}" \
-  --config=scenario/schema.json \
+  --config-dir=scenario/schema \
   --target-table=shops \
   --ids=1 \
   --output-dir=tmp/sqlite3 \

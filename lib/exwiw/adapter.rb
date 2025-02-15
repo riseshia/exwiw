@@ -17,13 +17,13 @@ module Exwiw
     end
 
     # @params [Array<Array<String>>] array of rows
-    # @params [Exwiw::Table] table
+    # @params [Exwiw::TableConfig] table
     def to_bulk_insert(results, table)
       raise NotImplementedError
     end
 
     # @params [Exwiw::QueryAst] select_query_ast
-    # @params [Exwiw::Table] table
+    # @params [Exwiw::TableConfig] table
     def to_bulk_delete(select_query_ast, table)
       raise NotImplementedError
     end

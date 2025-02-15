@@ -21,10 +21,11 @@ bundle exec exe/exwiw \
   --port=3306 \
   --user=root \
   --database="${FROM_DATABASE_NAME}" \
-  --config=scenario/schema.json \
+  --config-dir=scenario/schema \
   --target-table=shops \
   --ids=1 \
-  --output-dir=tmp/mysql2
+  --output-dir=tmp/mysql2 \
+  --log-level=debug
 
 # import to db
 for file in tmp/mysql2/delete-*.sql; do

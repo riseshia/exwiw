@@ -31,7 +31,7 @@ namespace :exwiw do
           Exwiw::TableColumn.from_symbol_keys({ name: name })
         end
 
-        table = Exwiw::Table.from_symbol_keys({
+        table = Exwiw::TableConfig.from_symbol_keys({
           name: model.table_name,
           primary_key: model.primary_key,
           belongs_tos: belongs_tos.compact,

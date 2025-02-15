@@ -54,7 +54,7 @@ exwiw \
   --port=3306 \
   --user=reader \
   --database=app_production \
-  --config=schema.json \
+  --config-dir=exwiw \
   --target-table=shops \
   --ids=1 \ # comma separated ids
   --output-dir=dump \
@@ -85,26 +85,28 @@ bundle exec rake exwiw:schema:generate
 
 ### Configuration
 
+This is an example of the one table schema:
+
 ```json
 {
-    "tables": [{
-        "name": "users",
-        "primary_key": "id",
-        "belongs_to": [{
-            "name": "companies",
-            "foreign_key": "company_id"
-        }],
-        "columns": [{
-            "name": "id",
-        }, {
-            "name": "email",
-            "replace_with": "user{id}@example.com"
-        }, {
-            "name": "company_id"
-        }]
+    "name": "users",
+    "primary_key": "id",
+    "belongs_to": [{
+        "name": "companies",
+        "foreign_key": "company_id"
+    }],
+    "columns": [{
+        "name": "id",
+    }, {
+        "name": "email",
+        "replace_with": "user{id}@example.com"
+    }, {
+        "name": "company_id"
     }]
 }
 ```
+
+`--config-dir` will use all json files in the specified directory.
 
 ### Masking
 

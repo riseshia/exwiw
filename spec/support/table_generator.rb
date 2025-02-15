@@ -2,7 +2,7 @@
 
 module TableGenerator
   def shops_table
-    @shops_table ||= Exwiw::Table.from_symbol_keys({
+    @shops_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'shops',
       primary_key: 'id',
       belongs_tos: [],
@@ -29,7 +29,7 @@ module TableGenerator
             raise ArgumentError, "Unknown masking strategy: #{masking_strategy}"
           end
 
-        Exwiw::Table.from_symbol_keys({
+        Exwiw::TableConfig.from_symbol_keys({
           name: 'users',
           primary_key: 'id',
           belongs_tos: [
@@ -64,7 +64,7 @@ module TableGenerator
             raise ArgumentError, "Unknown masking strategy: #{masking_strategy}"
           end
 
-        Exwiw::Table.from_symbol_keys({
+        Exwiw::TableConfig.from_symbol_keys({
           name: 'users',
           primary_key: 'id',
           belongs_tos: [
@@ -86,7 +86,7 @@ module TableGenerator
   end
 
   def products_table
-    @products_table ||= Exwiw::Table.from_symbol_keys({
+    @products_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'products',
       primary_key: 'id',
       belongs_tos: [
@@ -107,7 +107,7 @@ module TableGenerator
   end
 
   def orders_table
-    @orders_table ||= Exwiw::Table.from_symbol_keys({
+    @orders_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'orders',
       primary_key: 'id',
       belongs_tos: [
@@ -131,7 +131,7 @@ module TableGenerator
   end
 
   def order_items_table
-    @order_items_table ||= Exwiw::Table.from_symbol_keys({
+    @order_items_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'order_items',
       primary_key: 'id',
       belongs_tos: [
@@ -156,7 +156,7 @@ module TableGenerator
   end
 
   def transactions_table
-    @transactions_table ||= Exwiw::Table.from_symbol_keys({
+    @transactions_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'transactions',
       primary_key: 'id',
       belongs_tos: [
@@ -177,7 +177,7 @@ module TableGenerator
   end
 
   def reviews_table
-    @reviews_table ||= Exwiw::Table.from_symbol_keys({
+    @reviews_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'reviews',
       primary_key: 'id',
       belongs_tos: [
@@ -200,7 +200,7 @@ module TableGenerator
   end
 
   def system_announcements_table
-    @system_announcements_table ||= Exwiw::Table.from_symbol_keys({
+    @system_announcements_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'system_announcements',
       primary_key: 'id',
       belongs_tos: [],

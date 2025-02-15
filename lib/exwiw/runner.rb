@@ -7,29 +7,29 @@ module Exwiw
     def initialize(
       connection_config:,
       output_dir:,
-      config_path:,
+      config_dir:,
       dump_target:,
       logger:
     )
       @connection_config = connection_config
       @output_dir = output_dir
-      @config_path = config_path
+      @config_dir = config_dir
       @dump_target = dump_target
       @logger = logger
     end
 
     def run
-      config = load_config
       adapter = Adapter.build(@connection_config, @logger)
+      tables = load_table_config
 
       @logger.info("Determining table processing order...")
-      ordered_table_names = DetermineTableProcessingOrder.run(config.tables)
+      ordered_table_names = DetermineTableProcessingOrder.run(tables)
 
       if !Dir.exist?(@output_dir)
         FileUtils.mkdir_p(@output_dir)
       end
 
-      table_by_name = config.tables.each_with_object({}) { |table, hash| hash[table.name] = table }
+      table_by_name = tables.each_with_object({}) { |table, hash| hash[table.name] = table }
 
       total_size = ordered_table_names.size
       ordered_table_names.each_with_index do |table_name, idx|
@@ -70,9 +70,11 @@ module Exwiw
       end
     end
 
-    private def load_config
-      json = JSON.parse(File.read(@config_path))
-      Config.from(json)
+    private def load_table_config
+      Dir[File.join(@config_dir, "*.json")].map do |file|
+        json = JSON.parse(File.read(file))
+        TableConfig.from(json)
+      end
     end
 
     private def build_adapter

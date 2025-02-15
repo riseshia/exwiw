@@ -13,20 +13,16 @@ module Exwiw
       )
     end
     let(:output_dir) { 'tmp/test_output_dir' }
-    let(:config_path) { 'test_config.json' }
+    let(:config_dir) { 'test_config' }
     let(:dump_target) { double('DumpTarget') }
     let(:runner) do
       Runner.new(
         connection_config: connection_config,
         output_dir: output_dir,
-        config_path: config_path,
+        config_dir: config_dir,
         dump_target: dump_target,
         logger: ::Logger.new(nil),
       )
-    end
-
-    before do
-      allow(File).to receive(:read).with(config_path).and_return('{ "adapter": "sqlite3", "tables": [] }')
     end
 
     it 'writes bulk insert SQL to the output file' do

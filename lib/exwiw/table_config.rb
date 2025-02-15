@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Exwiw
-  class Table
+  class TableConfig
     include Serdes
 
     attribute :name, String
