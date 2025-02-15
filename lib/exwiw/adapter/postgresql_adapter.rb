@@ -31,7 +31,12 @@ module Exwiw
         sql = "DELETE FROM #{select_query_ast.from_table_name}"
 
         if select_query_ast.join_clauses.empty?
-          compiled_where_conditions = select_query_ast.where_clauses.map do |where|
+          # Ignore filter option, because bulk delete is for cleaning before import,
+          # so it should delete all records to avoid foreign key violation & data consistancy.
+          compiled_where_conditions = select_query_ast.
+            where_clauses.
+            select { |where| where.is_a?(Exwiw::QueryAst::WhereClause) }.
+            map do |where|
             compile_where_condition(where, select_query_ast.from_table_name)
           end
 
@@ -54,7 +59,9 @@ module Exwiw
           subquery_ast.join(join)
         end
         first_join.where_clauses.each do |where|
-          subquery_ast.where(where)
+          # Ignore filter option, because bulk delete is for cleaning before import,
+          # so it should delete all records to avoid foreign key violation & data consistancy.
+          subquery_ast.where(where) if where.is_a?(Exwiw::QueryAst::WhereClause)
         end
 
         foreign_key = first_join.foreign_key
@@ -89,6 +96,9 @@ module Exwiw
       end
 
       private def compile_where_condition(where_clause, table_name)
+        # Use as it is if it's a raw query
+        return where_clause if where_clause.is_a?(String)
+
         key = "#{table_name}.#{where_clause.column_name}"
 
         if where_clause.operator == :eq

@@ -6,6 +6,7 @@ module Exwiw
 
     attribute :name, String
     attribute :primary_key, String
+    attribute :filter, optional(String)
     attribute :belongs_tos, array(BelongsTo)
     attribute :columns, array(TableColumn)
 

@@ -1,6 +1,7 @@
 {
   "name": "orders",
   "primary_key": "id",
+  "filter": "orders.id > 2",
   "belongs_tos": [{
     "table_name": "shops",
     "foreign_key": "shop_id"

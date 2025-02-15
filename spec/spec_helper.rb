@@ -6,6 +6,7 @@ require 'exwiw'
 
 require_relative 'support/table_loader'
 require_relative 'support/bootstrap_databases'
+require_relative 'support/ast_factory'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -19,6 +20,7 @@ RSpec.configure do |config|
   end
 
   config.include(TableLoader)
+  config.include(AstFactory)
 
   config.before(:suite) do
     BootstrapDatabases.run

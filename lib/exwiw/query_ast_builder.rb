@@ -88,6 +88,10 @@ module Exwiw
         value: dump_target.ids
       )
 
+      if table.filter
+        clauses.push table.filter
+      end
+
       clauses
     end
 

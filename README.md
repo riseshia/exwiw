@@ -91,6 +91,7 @@ This is an example of the one table schema:
 {
     "name": "users",
     "primary_key": "id",
+    "filter": "users.id > 0",
     "belongs_to": [{
         "name": "companies",
         "foreign_key": "company_id"
@@ -107,6 +108,14 @@ This is an example of the one table schema:
 ```
 
 `--config-dir` will use all json files in the specified directory.
+
+### Filter
+
+Some case, you don't need full records related to target. e.g. dump user access logs only for the last year.
+`filter` is here for that. Be careful to use this option, as it will be:
+
+- injected as it is in table condition(e.g. WHERE on mysql), so you are recommended to clearify table name of column to avoid ambiguity.
+- injected to every where / join clause, so it affects to all tables depends on filterted target-table. it results to data inconsistency.
 
 ### Masking
 
