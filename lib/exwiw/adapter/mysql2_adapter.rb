@@ -109,11 +109,15 @@ module Exwiw
         when nil
           "NULL"
         when String
-          qv = connection.escape(value)
+          qv = escape_single_quote(value)
           "'#{qv}'"
         else
           value
         end
+      end
+
+      private def escape_single_quote(value)
+        value.gsub("'", "''")
       end
 
       private def compile_column_name(ast, column)
