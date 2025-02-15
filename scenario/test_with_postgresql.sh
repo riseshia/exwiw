@@ -23,7 +23,7 @@ bundle exec exe/exwiw \
   --port=5432 \
   --user=postgres \
   --database="${FROM_DATABASE_NAME}" \
-  --config-dir=scenario/schema \
+  --config-dir=scenario/postgresql-schema \
   --target-table=shops \
   --ids=1 \
   --output-dir=tmp/postgresql

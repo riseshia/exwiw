@@ -21,7 +21,7 @@ bundle exec exe/exwiw \
   --port=3306 \
   --user=root \
   --database="${FROM_DATABASE_NAME}" \
-  --config-dir=scenario/schema \
+  --config-dir=scenario/mysql2-schema \
   --target-table=shops \
   --ids=1 \
   --output-dir=tmp/mysql2 \

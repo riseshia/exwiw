@@ -1,0 +1,22 @@
+{
+  "name": "users",
+  "primary_key": "id",
+  "belongs_tos": [{
+    "table_name": "shops",
+    "foreign_key": "shop_id"
+  }],
+  "columns": [{
+    "name": "id"
+  }, {
+  "name": "name"
+  }, {
+  "name": "email",
+  "replace_with": "masked-{id}@example.com"
+  }, {
+  "name": "shop_id"
+  }, {
+  "name": "updated_at"
+  }, {
+  "name": "created_at"
+  }]
+}
