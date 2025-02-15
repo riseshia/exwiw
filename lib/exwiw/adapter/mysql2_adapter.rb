@@ -14,14 +14,7 @@ module Exwiw
 
         value_list = results.map do |row|
           quoted_values = row.map do |value|
-            case value
-            when nil
-              "NULL"
-            when String
-              "'#{value}'"
-            else
-              value
-            end
+            escape_value(value)
           end
           "(" + quoted_values.join(', ') + ")"
         end
@@ -111,8 +104,12 @@ module Exwiw
       end
 
       private def escape_value(value)
-        if value.is_a?(String)
-          "'#{value}'"
+        case value
+        when nil
+          "NULL"
+        when String
+          qv = connection.escape(value)
+          "'#{qv}'"
         else
           value
         end
