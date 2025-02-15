@@ -57,7 +57,8 @@ exwiw \
   --config=schema.json \
   --target-table=shops \
   --ids=1 \ # comma separated ids
-  --output-dir=dump
+  --output-dir=dump \
+  --log-level=info
 ```
 
 This command will generate sql files in the `dump` directory.

@@ -20,7 +20,8 @@ bundle exec exe/exwiw \
   --config=scenario/schema.json \
   --target-table=shops \
   --ids=1 \
-  --output-dir=tmp/sqlite3
+  --output-dir=tmp/sqlite3 \
+  --log-level=debug
 
 # import to db
 bundle exec ruby scenario/import_with_sqlite3.rb $NEW_DB_PATH

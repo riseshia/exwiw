@@ -6,6 +6,7 @@ module Exwiw
       def execute(query_ast)
         sql = compile_ast(query_ast)
 
+        @logger.debug("  Executing SQL: \n#{sql}")
         connection.exec(sql).values
       end
 

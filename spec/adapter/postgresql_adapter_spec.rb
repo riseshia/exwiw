@@ -13,7 +13,8 @@ module Exwiw
           password: 'test_password',
         )
       end
-      let(:adapter) { described_class.new(connection_config) }
+      let(:logger) { Logger.new(nil) }
+      let(:adapter) { described_class.new(connection_config, logger) }
 
       let(:simple_query_ast) do
         QueryAst::Select.new.tap do |ast|

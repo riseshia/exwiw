@@ -5,8 +5,9 @@ module Exwiw
     class Base
       attr_reader :connection_config
 
-      def initialize(connection_config)
+      def initialize(connection_config, logger)
         @connection_config = connection_config
+        @logger = logger
       end
     end
 
@@ -27,14 +28,14 @@ module Exwiw
       raise NotImplementedError
     end
 
-    def self.build(connection_config)
+    def self.build(connection_config, logger)
       case connection_config.adapter
       when 'sqlite3'
-        Adapter::Sqlite3Adapter.new(connection_config)
+        Adapter::Sqlite3Adapter.new(connection_config, logger)
       when 'mysql2'
-        Adapter::Mysql2Adapter.new(connection_config)
+        Adapter::Mysql2Adapter.new(connection_config, logger)
       when 'postgresql'
-        Adapter::PostgresqlAdapter.new(connection_config)
+        Adapter::PostgresqlAdapter.new(connection_config, logger)
       else
         raise 'Unsupported adapter'
       end

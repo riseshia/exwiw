@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'logger'
 require 'optparse'
 require 'pathname'
 
@@ -27,6 +28,7 @@ module Exwiw
       @database_name = nil
       @target_table_name = nil
       @ids = []
+      @log_level = :info
 
       parser.parse!(@argv)
     end
@@ -51,7 +53,15 @@ module Exwiw
           ids: @ids,
         )
 
-        Runner.new(connection_config, @output_dir, @config_path, dump_target).run
+        logger = build_logger
+
+        Runner.new(
+          connection_config: connection_config,
+          output_dir: @output_dir,
+          config_path: @config_path,
+          dump_target: dump_target,
+          logger: logger,
+        ).run
       end
     end
 
@@ -92,6 +102,21 @@ module Exwiw
       end
     end
 
+    private def build_logger
+      formatter = proc do |severity, timestamp, progname, msg|
+        formatted_ts = timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        "#{formatted_ts} [#{progname}]: #{msg}\n"
+      end
+
+      Logger.new(
+        STDOUT,
+        level: @log_level,
+        datetime_format: "%Y-%m-%d %H:%M:%S",
+        progname: "exwiw",
+        formatter: formatter,
+      )
+    end
+
     private def parser
       @parser ||= OptionParser.new do |opts|
         opts.banner = "exwiw #{Exwiw::VERSION}"
@@ -108,6 +133,7 @@ module Exwiw
         opts.on("--database=DATABASE", "Target database name") { |v| @database_name = v }
         opts.on("--target-table=TABLE", "Target table for extraction") { |v| @target_table_name = v }
         opts.on("--ids=IDS", "Comma-separated list of identifiers") { |v| @ids = v.split(',') }
+        opts.on("--log-level=LEVEL", "Log level (debug, info). default is info") { |v| @log_level = v.to_sym }
 
         opts.on("--help", "Print this help") do
           @help = true

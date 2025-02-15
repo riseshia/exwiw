@@ -21,7 +21,8 @@ RSpec.describe Exwiw::QueryAstBuilder do
         hash[table.name] = table
       end
     end
-    let(:built_query_ast) { described_class.run(table.name, table_by_name, dump_target) }
+    let(:logger) { Logger.new(nil) }
+    let(:built_query_ast) { described_class.run(table.name, table_by_name, dump_target, logger) }
 
     def simply_columns(columns)
       columns.map do |c|

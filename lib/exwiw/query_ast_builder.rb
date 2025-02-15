@@ -1,10 +1,21 @@
 # frozen_string_literal: true
 
 module Exwiw
-  module QueryAstBuilder
-    module_function
+  class QueryAstBuilder
+    def self.run(table_name, table_by_name, dump_target, logger)
+      new(table_name, table_by_name, dump_target, logger).run
+    end
 
-    def run(table_name, table_by_name, dump_target)
+    attr_reader :table_name, :table_by_name, :dump_target
+
+    def initialize(table_name, table_by_name, dump_target, logger)
+      @table_name = table_name
+      @table_by_name = table_by_name
+      @dump_target = dump_target
+      @logger = logger
+    end
+
+    def run
       table = table_by_name.fetch(table_name)
 
       where_clauses = build_where_clauses(table, dump_target)

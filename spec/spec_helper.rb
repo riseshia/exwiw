@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-require "exwiw"
+require 'logger'
+
+require 'exwiw'
 
 require_relative 'support/table_generator'
 require_relative 'support/bootstrap_databases'
