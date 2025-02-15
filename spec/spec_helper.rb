@@ -4,7 +4,7 @@ require 'logger'
 
 require 'exwiw'
 
-require_relative 'support/table_generator'
+require_relative 'support/table_loader'
 require_relative 'support/bootstrap_databases'
 
 RSpec.configure do |config|
@@ -18,7 +18,7 @@ RSpec.configure do |config|
     c.syntax = :expect
   end
 
-  config.include(TableGenerator)
+  config.include(TableLoader)
 
   config.before(:suite) do
     BootstrapDatabases.run

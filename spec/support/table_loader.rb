@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module TableGenerator
+module TableLoader
   def shops_table
     @shops_table ||= Exwiw::TableConfig.from_symbol_keys({
       name: 'shops',
