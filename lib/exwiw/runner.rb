@@ -39,12 +39,18 @@ module Exwiw
         query_ast = QueryAstBuilder.run(table.name, table_by_name, @dump_target, @logger)
         results = adapter.execute(query_ast)
 
+        # #size on mysql / pg results  is not available ;)
+        record_num = results.reduce(0) { |acc, result| acc + result.size }
+
+        if record_num.zero?
+          @logger.info("  No records matched. skip this table.")
+          next
+        end
         @logger.debug("  Generate INSERT SQL...")
 
-        next if results.empty?
-
         insert_sql = adapter.to_bulk_insert(results, table)
-        @logger.info("  Generated INSERT SQL for #{results.size} records.")
+
+        @logger.info("  Generated INSERT SQL for #{record_num} records.")
         insert_idx = (idx + 1).to_s.rjust(3, '0')
         File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.sql"), 'w') do |file|
           file.puts(insert_sql)
