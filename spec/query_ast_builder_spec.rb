@@ -7,13 +7,13 @@ RSpec.describe Exwiw::QueryAstBuilder do
     let(:dump_target) { Exwiw::DumpTarget.new(table_name: 'shops', ids: [1]) }
     let(:all_tables) do
       [
-        users_table,
-        shops_table,
-        products_table,
-        orders_table,
-        order_items_table,
-        transactions_table,
-        system_announcements_table,
+        users_table(:sqlite3),
+        shops_table(:sqlite3),
+        products_table(:sqlite3),
+        orders_table(:sqlite3),
+        order_items_table(:sqlite3),
+        transactions_table(:sqlite3),
+        system_announcements_table(:sqlite3),
       ]
     end
     let(:table_by_name) do
@@ -38,15 +38,15 @@ RSpec.describe Exwiw::QueryAstBuilder do
     end
 
     context 'when the table is same as dump target table' do
-      let(:table) { shops_table }
+      let(:table) { shops_table(:sqlite3) }
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('shops')
         expect(simply_columns(built_query_ast.columns)).to eq([
           { name: 'id' },
           { name: 'name' },
-          { name: 'created_at' },
           { name: 'updated_at' },
+          { name: 'created_at' },
         ])
         expect(built_query_ast.join_clauses).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
@@ -56,48 +56,17 @@ RSpec.describe Exwiw::QueryAstBuilder do
     end
 
     context 'when the table has foreign key to dump target table' do
-      let(:table) { users_table }
+      let(:table) { users_table(:sqlite3) }
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('users')
         expect(simply_columns(built_query_ast.columns)).to eq([
           { name: 'id' },
-          { name: 'name' },
+          { name: 'name', raw_sql: "('masked' || users.id)" },
           { name: 'email', replace_with: 'masked{id}@example.com' },
           { name: 'shop_id' },
-          { name: 'created_at' },
           { name: 'updated_at' },
-        ])
-        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([])
-        expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
-          { column_name: 'shop_id', operator: :eq, value: [1] },
-        ])
-      end
-    end
-
-    context 'when the table column has raw sql option' do
-      let(:all_tables) do # override table_by_name
-        [
-          table,
-          shops_table,
-          products_table,
-          orders_table,
-          order_items_table,
-          transactions_table,
-          system_announcements_table,
-        ]
-      end
-      let(:table) { users_table(masking_strategy: :raw_sql) }
-
-      it 'builds correct query ast' do
-        expect(built_query_ast.from_table_name).to eq('users')
-        expect(simply_columns(built_query_ast.columns)).to eq([
-          { name: 'id' },
-          { name: 'name' },
-          { name: 'email', raw_sql: "('rawsql' || users.id || '@example.com')" },
-          { name: 'shop_id' },
           { name: 'created_at' },
-          { name: 'updated_at' },
         ])
         expect(built_query_ast.join_clauses.map(&:to_h)).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
@@ -107,7 +76,7 @@ RSpec.describe Exwiw::QueryAstBuilder do
     end
 
     context 'when the table is N:M relation to dump target table' do
-      let(:table) { order_items_table }
+      let(:table) { order_items_table(:sqlite3) }
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('order_items')
@@ -116,8 +85,8 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: 'quantity' },
           { name: 'order_id' },
           { name: 'product_id' },
-          { name: 'created_at' },
           { name: 'updated_at' },
+          { name: 'created_at' },
         ])
         expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
           base_table_name: 'order_items',
@@ -131,7 +100,7 @@ RSpec.describe Exwiw::QueryAstBuilder do
     end
 
     context 'when the table is indirect relation with dump target table' do
-      let(:table) { transactions_table }
+      let(:table) { transactions_table(:sqlite3) }
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('transactions')
@@ -140,8 +109,8 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: 'type' },
           { name: 'amount' },
           { name: 'order_id' },
-          { name: 'created_at' },
           { name: 'updated_at' },
+          { name: 'created_at' },
         ])
         expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
           base_table_name: 'transactions',
@@ -155,7 +124,7 @@ RSpec.describe Exwiw::QueryAstBuilder do
     end
 
     context 'when the table has no relation with dump target table' do
-      let(:table) { system_announcements_table }
+      let(:table) { system_announcements_table(:sqlite3) }
 
       it 'builds correct query ast' do
         expect(built_query_ast.from_table_name).to eq('system_announcements')
@@ -163,8 +132,8 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: 'id' },
           { name: 'title' },
           { name: 'content' },
-          { name: 'created_at' },
           { name: 'updated_at' },
+          { name: 'created_at' },
         ])
         expect(built_query_ast.join_clauses).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([])

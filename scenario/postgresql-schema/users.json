@@ -8,15 +8,16 @@
   "columns": [{
     "name": "id"
   }, {
-  "name": "name"
+    "name": "name",
+    "raw_sql": "CONCAT('masked', users.id)"
   }, {
-  "name": "email",
-  "replace_with": "masked-{id}@example.com"
+    "name": "email",
+    "replace_with": "masked{id}@example.com"
   }, {
-  "name": "shop_id"
+    "name": "shop_id"
   }, {
-  "name": "updated_at"
+    "name": "updated_at"
   }, {
-  "name": "created_at"
+    "name": "created_at"
   }]
 }

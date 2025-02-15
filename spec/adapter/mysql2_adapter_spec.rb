@@ -3,9 +3,10 @@
 module Exwiw
   module Adapter
     RSpec.describe Mysql2Adapter do
+      let(:adapter_name) { 'mysql2' }
       let(:connection_config) do
         ConnectionConfig.new(
-          adapter: 'mysql2',
+          adapter: adapter_name,
           database_name: 'exwiw_test',
           host: '127.0.0.1',
           port: 3306,
@@ -17,6 +18,8 @@ module Exwiw
       let(:adapter) { described_class.new(connection_config, logger) }
 
       let(:simple_query_ast) do
+        shops_table = shops_table(adapter_name)
+
         QueryAst::Select.new.tap do |ast|
           ast.from(shops_table.name)
           ast.select(shops_table.columns)
@@ -30,7 +33,9 @@ module Exwiw
         end
       end
 
-      let(:replace_with_query_ast) do
+      let(:masking_query_ast) do
+        users_table = users_table(adapter_name)
+
         QueryAst::Select.new.tap do |ast|
           ast.from(users_table.name)
           ast.select(users_table.columns)
@@ -44,23 +49,9 @@ module Exwiw
         end
       end
 
-      let(:raw_sql_query_ast) do
-        QueryAst::Select.new.tap do |ast|
-          table = users_table_with_mysql(masking_strategy: :raw_sql)
-
-          ast.from(table.name)
-          ast.select(table.columns)
-          ast.where(
-            QueryAst::WhereClause.new(
-              column_name: "shop_id",
-              operator: :eq,
-              value: [1],
-            )
-          )
-        end
-      end
-
       let(:join_query_ast) do
+        order_items_table = order_items_table(adapter_name)
+
         QueryAst::Select.new.tap do |ast|
           ast.from(order_items_table.name)
           ast.select(order_items_table.columns)
@@ -87,15 +78,15 @@ module Exwiw
           let(:sql) { adapter.compile_ast(simple_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT shops.id, shops.name, shops.created_at, shops.updated_at FROM shops WHERE shops.id = 1")
+            expect(sql).to eq("SELECT shops.id, shops.name, shops.updated_at, shops.created_at FROM shops WHERE shops.id = 1")
           end
         end
 
-        context "simple select query2" do
-          let(:sql) { adapter.compile_ast(replace_with_query_ast) }
+        context "select query with masking" do
+          let(:sql) { adapter.compile_ast(masking_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT users.id, users.name, CONCAT('masked', users.id, '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
+            expect(sql).to eq("SELECT users.id, CONCAT('masked', users.id), CONCAT('masked', users.id, '@example.com'), users.shop_id, users.updated_at, users.created_at FROM users WHERE users.shop_id = 1")
           end
         end
 
@@ -104,7 +95,7 @@ module Exwiw
 
           it "builds sql" do
             expect(sql).to eq(
-              "SELECT order_items.id, order_items.quantity, order_items.order_id, order_items.product_id, order_items.created_at, order_items.updated_at FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
+              "SELECT order_items.id, order_items.quantity, order_items.order_id, order_items.product_id, order_items.updated_at, order_items.created_at FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
             )
           end
         end
@@ -115,36 +106,19 @@ module Exwiw
           let(:results) { adapter.execute(simple_query_ast) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
-            expect(results.to_a).to eq([
+            expect(results).to eq([
               ["1", "Shop 1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
           end
         end
 
-        context "replace with select query" do
-          let(:results) { adapter.execute(replace_with_query_ast) }
+        context "masking select query" do
+          let(:results) { adapter.execute(masking_query_ast) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
-            expect(results.to_a).to eq([
-              ["1", "User 1", "masked1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
-              ["2", "User 2", "masked2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
-            ])
-          end
-        end
-
-        context "raw sql with select query" do
-          let(:results) { adapter.execute(raw_sql_query_ast) }
-
-          it "returns correct results" do
-            skip if ENV["CI"]
-
-            expect(results.to_a).to eq([
-              ["1", "User 1", "rawsql1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
-              ["2", "User 2", "rawsql2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+            expect(results).to eq([
+              ["1", "masked1", "masked1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+              ["2", "masked2", "masked2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
           end
         end
@@ -153,9 +127,7 @@ module Exwiw
           let(:results) { adapter.execute(join_query_ast) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
-            expect(results.to_a).to eq([
+            expect(results).to eq([
               ["1", "1", "1", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["3", "1", "3", "3", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -172,15 +144,15 @@ module Exwiw
           let(:sql) { adapter.compile_ast(simple_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT shops.id, shops.name, shops.created_at, shops.updated_at FROM shops WHERE shops.id = 1")
+            expect(sql).to eq("SELECT shops.id, shops.name, shops.updated_at, shops.created_at FROM shops WHERE shops.id = 1")
           end
         end
 
-        context "simple select query2" do
-          let(:sql) { adapter.compile_ast(replace_with_query_ast) }
+        context "select query with masking" do
+          let(:sql) { adapter.compile_ast(masking_query_ast) }
 
           it "builds sql" do
-            expect(sql).to eq("SELECT users.id, users.name, CONCAT('masked', users.id, '@example.com'), users.shop_id, users.created_at, users.updated_at FROM users WHERE users.shop_id = 1")
+            expect(sql).to eq("SELECT users.id, CONCAT('masked', users.id), CONCAT('masked', users.id, '@example.com'), users.shop_id, users.updated_at, users.created_at FROM users WHERE users.shop_id = 1")
           end
         end
 
@@ -189,33 +161,33 @@ module Exwiw
 
           it "builds sql" do
             expect(sql).to eq(
-              "SELECT order_items.id, order_items.quantity, order_items.order_id, order_items.product_id, order_items.created_at, order_items.updated_at FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
+              "SELECT order_items.id, order_items.quantity, order_items.order_id, order_items.product_id, order_items.updated_at, order_items.created_at FROM order_items JOIN orders ON order_items.order_id = orders.id AND orders.shop_id = 1"
             )
           end
         end
         let(:results) do
           [
-            [1, "Shop 1", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-            [2, "Shop 2", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
-            [3, "Shop 3", "2025-01-01 00:00:00", "2025-01-01 00:00:00"],
+            [1, "Shop 1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+            [2, "Shop 2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
+            [3, "Shop 3", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
           ]
         end
 
-        let(:bulk_insert_sql) { adapter.to_bulk_insert(results, shops_table) }
+        let(:bulk_insert_sql) { adapter.to_bulk_insert(results, shops_table(adapter_name)) }
 
         it "returns correct bulk insert sql" do
           expect(bulk_insert_sql.strip).to eq(<<~SQL.strip)
-            INSERT INTO shops (id, name, created_at, updated_at) VALUES
-            (1, 'Shop 1', '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
-            (2, 'Shop 2', '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
-            (3, 'Shop 3', '2025-01-01 00:00:00', '2025-01-01 00:00:00');
+            INSERT INTO shops (id, name, updated_at, created_at) VALUES
+            (1, 'Shop 1', '2025-01-01 00:00:00.000000', '2025-01-01 00:00:00.000000'),
+            (2, 'Shop 2', '2025-01-01 00:00:00.000000', '2025-01-01 00:00:00.000000'),
+            (3, 'Shop 3', '2025-01-01 00:00:00.000000', '2025-01-01 00:00:00.000000');
           SQL
         end
       end
 
       describe "#to_bulk_delete" do
         context "simple select query" do
-          let(:bulk_delete_sql) { adapter.to_bulk_delete(simple_query_ast, shops_table) }
+          let(:bulk_delete_sql) { adapter.to_bulk_delete(simple_query_ast, shops_table(adapter_name)) }
 
           it "builds sql" do
             expect(bulk_delete_sql.strip).to eq(<<~SQL.strip)
@@ -225,8 +197,8 @@ module Exwiw
           end
         end
 
-        context "simple select query2" do
-          let(:bulk_delete_sql) { adapter.to_bulk_delete(replace_with_query_ast, users_table) }
+        context "select query with masking" do
+          let(:bulk_delete_sql) { adapter.to_bulk_delete(masking_query_ast, users_table(adapter_name)) }
 
           it "builds sql" do
             expect(bulk_delete_sql.strip).to eq(<<~SQL.strip)
@@ -237,7 +209,7 @@ module Exwiw
         end
 
         context "select query with one join" do
-          let(:bulk_delete_sql) { adapter.to_bulk_delete(join_query_ast, order_items_table) }
+          let(:bulk_delete_sql) { adapter.to_bulk_delete(join_query_ast, order_items_table(adapter_name)) }
 
           it "builds sql" do
             expect(bulk_delete_sql.strip).to eq(<<~SQL.strip)

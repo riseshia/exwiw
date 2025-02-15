@@ -12,7 +12,7 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
 
     context 'when there are only shops' do
       let(:tables) do
-        [shops_table]
+        [shops_table(:sqlite3)]
       end
 
       it 'returns shops' do
@@ -23,8 +23,8 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when there are independent' do
       let(:tables) do
         [
-          system_announcements_table,
-          shops_table,
+          system_announcements_table(:sqlite3),
+          shops_table(:sqlite3),
         ]
       end
 
@@ -36,11 +36,11 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when there are just belongs_to' do
       let(:tables) do
         [
-          orders_table,
-          users_table,
-          products_table,
-          system_announcements_table,
-          shops_table,
+          orders_table(:sqlite3),
+          users_table(:sqlite3),
+          products_table(:sqlite3),
+          system_announcements_table(:sqlite3),
+          shops_table(:sqlite3),
         ]
       end
 
@@ -58,11 +58,11 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when there are belongs_to, n:m' do
       let(:tables) do
         [
-          order_items_table,
-          orders_table,
-          users_table,
-          products_table,
-          shops_table,
+          order_items_table(:sqlite3),
+          orders_table(:sqlite3),
+          users_table(:sqlite3),
+          products_table(:sqlite3),
+          shops_table(:sqlite3),
         ]
       end
 
@@ -80,10 +80,10 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when there is polymorphic' do
       let(:tables) do
         [
-          users_table,
-          products_table,
-          reviews_table,
-          shops_table,
+          users_table(:sqlite3),
+          products_table(:sqlite3),
+          reviews_table(:sqlite3),
+          shops_table(:sqlite3),
         ]
       end
 
@@ -101,11 +101,11 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when there is sti' do
       let(:tables) do
         [
-          transactions_table,
-          orders_table,
-          users_table,
-          products_table,
-          shops_table,
+          transactions_table(:sqlite3),
+          orders_table(:sqlite3),
+          users_table(:sqlite3),
+          products_table(:sqlite3),
+          shops_table(:sqlite3),
         ]
       end
 
@@ -123,13 +123,13 @@ RSpec.describe Exwiw::DetermineTableProcessingOrder do
     context 'when full tables' do
       let(:tables) do
         [
-          order_items_table,
-          transactions_table,
-          orders_table,
-          users_table,
-          products_table,
-          system_announcements_table,
-          shops_table,
+          order_items_table(:sqlite3),
+          transactions_table(:sqlite3),
+          orders_table(:sqlite3),
+          users_table(:sqlite3),
+          products_table(:sqlite3),
+          system_announcements_table(:sqlite3),
+          shops_table(:sqlite3),
         ]
       end
 
