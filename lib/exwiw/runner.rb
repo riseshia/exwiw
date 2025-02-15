@@ -38,9 +38,7 @@ module Exwiw
 
         query_ast = QueryAstBuilder.run(table.name, table_by_name, @dump_target, @logger)
         results = adapter.execute(query_ast)
-
-        # #size on mysql / pg results  is not available ;)
-        record_num = results.reduce(0) { |acc, result| acc + result.size }
+        record_num = results.size
 
         if record_num.zero?
           @logger.info("  No records matched. skip this table.")

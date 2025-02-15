@@ -7,7 +7,7 @@ module Exwiw
         sql = compile_ast(query_ast)
 
         @logger.debug("  Executing SQL: \n#{sql}")
-        connection.query(sql, cast: false, as: :array)
+        connection.query(sql, cast: false, as: :array).to_a
       end
 
       def to_bulk_insert(results, table)
