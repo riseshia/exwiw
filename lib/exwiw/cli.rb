@@ -72,12 +72,15 @@ module Exwiw
           "Target database port" => @database_port,
           "Database user" => @database_user,
           "Target database name" => @database_name,
-          "Config dir" => @config_dir,
         }.each do |k, v|
           if v.nil?
             $stderr.puts "#{k} is required"
             exit 1
           end
+        end
+
+        if @config_dir.nil?
+          $stderr.puts "Config dir is required"
         end
 
         if @database_password.nil? || @database_password.empty?
