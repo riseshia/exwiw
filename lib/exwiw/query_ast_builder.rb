@@ -31,6 +31,7 @@ module Exwiw
 
     private def build_join_clauses(table, table_by_name, dump_target)
       path_tables = find_path_to_dump_target(table, table_by_name, dump_target)
+      @logger.debug("  Join path from the table to dump target: #{path_tables}")
 
       # the path is empty, it means that the table is not related to the dump target
       # the path is 1, it's impossible case

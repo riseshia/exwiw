@@ -33,7 +33,7 @@ module Exwiw
 
       total_size = ordered_table_names.size
       ordered_table_names.each_with_index do |table_name, idx|
-        @logger.info("Processing table '#{table_name}'...")
+        @logger.info("Processing table '#{table_name}'... (#{idx + 1}/#{total_size})")
         table = table_by_name.fetch(table_name)
 
         query_ast = QueryAstBuilder.run(table.name, table_by_name, @dump_target, @logger)
