@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Shia"]
   spec.email = ["rise.shia@gmail.com"]
 
-  spec.summary = "Export What I Want (Exwiw) is a Ruby gem that allows you to export records from a database to a dump file."
-  spec.description = spec.summary
+  spec.summary = "Ruby gem that allows you to export records from a database to a dump file."
+  spec.description = "Export What I Want (Exwiw) is a Ruby gem that allows you to export records from a database to a dump file."
   spec.homepage = "https://github.com/riseshia/exwiw"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "https://github.com/riseshia/exwiw/tree/main"
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
 
   # Specify which files should be added to the gem when it is released.
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
     ls.readlines("\x0", chomp: true).reject do |f|
       (f == gemspec) ||
-        f.start_with?(*%w[bin/ spec/ script/ seed/ scenario/ .git .github .cursor Gemfile])
+        f.start_with?(*%w[bin/ spec/ script/ seed/ scenario/ tmp/ .git .github .cursor .rspec Gemfile Rakefile compose.yml])
     end
   end
   spec.bindir = "exe"
