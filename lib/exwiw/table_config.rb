@@ -11,7 +11,7 @@ module Exwiw
     attribute :columns, array(TableColumn)
 
     def self.from_symbol_keys(hash)
-      from(hash.transform_keys(&:to_s))
+      from(JSON.parse(hash.to_json))
     end
 
     def column_names
@@ -62,6 +62,30 @@ module Exwiw
         last = ret.last
         last[:where] = [{ last[:foreign_key] => extract_target_ids }]
         ret
+      end
+    end
+
+    def merge(passed_table)
+      return passed_table if passed_table.to_hash == self.to_hash
+
+
+      TableConfig.new.tap do |merged_table|
+        merged_table.name = name
+        merged_table.primary_key = passed_table.primary_key
+        merged_table.filter = filter
+        merged_table.belongs_tos = passed_table.belongs_tos
+
+        receiver_column_by_name = columns.each_with_object({}) { |column, hash| hash[column.name] = column }
+
+        merged_table.columns =
+          passed_table.columns.map do |passed_column|
+            if receiver_column_by_name.key?(passed_column.name)
+              receiver_column = receiver_column_by_name[passed_column.name]
+              receiver_column
+            else
+              passed_column
+            end
+          end
       end
     end
 

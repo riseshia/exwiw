@@ -48,7 +48,13 @@ namespace :exwiw do
 
       tables.each do |table|
         path = File.join(output_dir, "#{table.name}.json")
-        File.write(path, JSON.pretty_generate(table.to_hash))
+        if File.exist?(path)
+          current_config = Exwiw::TableConfig.from(JSON.parse(File.read(path)))
+          merged_config = current_config.merge(table)
+          File.write(path, JSON.pretty_generate(merged_config.to_hash))
+        else
+          File.write(path, JSON.pretty_generate([table.to_hash]))
+        end
       end
     end
   end
