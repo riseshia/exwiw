@@ -43,10 +43,11 @@ namespace :exwiw do
 
       tables = table_by_name.values
 
-      FileUtils.mkdir_p("exwiw")
+      output_dir = ENV['OUTPUT_DIR_PATH'] || "exwiw"
+      FileUtils.mkdir_p(output_dir)
 
       tables.each do |table|
-        path = File.join("exwiw", "#{table.name}.json")
+        path = File.join(output_dir, "#{table.name}.json")
         File.write(path, JSON.pretty_generate(table.to_hash))
       end
     end

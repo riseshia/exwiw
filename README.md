@@ -76,11 +76,17 @@ idx meaning is the same as insert sql.
 
 ### Generator
 
-the config generator is provided as Rake task.
+The config generator is provided as a Rake task.
 
 ```bash
 # generate table schema under exwiw/
 bundle exec rake exwiw:schema:generate
+```
+
+By default, the schema files will be saved in the `exwiw` directory. You can specify a different output directory by setting the `OUTPUT_DIR_PATH` environment variable:
+
+```sh
+OUTPUT_DIR_PATH=custom_directory bundle exec rake exwiw:schema:generate
 ```
 
 ### Configuration
