@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-03-02
+
 ### Added
 
 - Added support for `OUTPUT_DIR_PATH` environment variable in `exwiw:schema:generate` task to specify custom output directory for generated schema files.
