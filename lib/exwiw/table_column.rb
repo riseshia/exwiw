@@ -5,8 +5,8 @@ module Exwiw
     include Serdes
 
     attribute :name, String
-    attribute :replace_with, optional(String)
-    attribute :raw_sql, optional(String)
+    attribute :replace_with, optional(String), skip_serializing_if_nil: true
+    attribute :raw_sql, optional(String), skip_serializing_if_nil: true
 
     def self.from_symbol_keys(hash)
       from(hash.transform_keys(&:to_s))

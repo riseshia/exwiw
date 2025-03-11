@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Do not serialize when optional attribute is `nil`.
+
 ## [0.1.1] - 2025-03-02
 
 ### Added

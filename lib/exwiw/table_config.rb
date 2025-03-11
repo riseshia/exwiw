@@ -6,7 +6,7 @@ module Exwiw
 
     attribute :name, String
     attribute :primary_key, String
-    attribute :filter, optional(String)
+    attribute :filter, optional(String), skip_serializing_if_nil: true
     attribute :belongs_tos, array(BelongsTo)
     attribute :columns, array(TableColumn)
 
