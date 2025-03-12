@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    exwiw (0.1.1)
+    exwiw (0.1.2)
       serdes (~> 0.1)
 
 GEM
