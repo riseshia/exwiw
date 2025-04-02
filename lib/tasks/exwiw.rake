@@ -53,7 +53,7 @@ namespace :exwiw do
           merged_config = current_config.merge(table)
           File.write(path, JSON.pretty_generate(merged_config.to_hash))
         else
-          File.write(path, JSON.pretty_generate([table.to_hash]))
+          File.write(path, JSON.pretty_generate(table.to_hash))
         end
       end
     end
