@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2025-04-02
+
 ### Fixed
 
 - Generate correct schema when schema is not exist via `exwiw:schema:generate` task.
