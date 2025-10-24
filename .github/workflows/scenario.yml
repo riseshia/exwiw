@@ -24,40 +24,30 @@ jobs:
       - name: Run exwiw
         run: scenario/test_with_sqlite3.sh
 
-  # XXX: Disable temparary. mysql in compose fail to launch, we can't test it.
-  # with_mysql:
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   name: Scenario with mysql
-  #
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Compose up
-  #       run: docker compose -f compose.yml up -d
-  #
-  #     - name: Set up Ruby
-  #       uses: ruby/setup-ruby@v1
-  #       with:
-  #         ruby-version: '3.4'
-  #         bundler-cache: true
-  #
-  #     - name: Wait mysql / postgres
-  #       run: script/wait-database-up.sh
-  #
-  #     - name: Run exwiw
-  #       run: scenario/test_with_mysql2.sh
-
-  with_postgres:
+  with_mysql:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    name: Scenario with postgres
+    name: Scenario with mysql
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+
+    services:
+      mysql:
+        image: mysql:9
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: exwiw_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Compose up
-        run: docker compose -f compose.yml up -d
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -65,8 +55,40 @@ jobs:
           ruby-version: '3.4'
           bundler-cache: true
 
-      - name: Wait mysql / postgres
-        run: script/wait-database-up.sh
+      - name: Run exwiw
+        run: scenario/test_with_mysql2.sh
+
+  with_postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    name: Scenario with postgres
+    env:
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: exwiw_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
 
       - name: Run exwiw
         run: scenario/test_with_postgresql.sh

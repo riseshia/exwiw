@@ -5,13 +5,22 @@ set -e
 export FROM_DATABASE_NAME="exwiw_scenario_prod_db"
 export TO_DATABASE_NAME="exwiw_scenario_dev_db"
 
+# Determine MySQL command based on environment
+if [ -n "$CI" ]; then
+  # CI environment: use mysql client directly
+  MYSQL_CMD="mysql -h 127.0.0.1 -P 3306 -u root -prootpassword"
+else
+  # Local environment: use docker compose exec
+  MYSQL_CMD="docker compose exec -T mysql mysql -u root"
+fi
+
 # Clean up
-docker compose exec -T mysql mysql -u root -e "DROP DATABASE IF EXISTS ${FROM_DATABASE_NAME}; CREATE DATABASE ${FROM_DATABASE_NAME};"
-docker compose exec -T mysql mysql -u root -e "DROP DATABASE IF EXISTS ${TO_DATABASE_NAME}; CREATE DATABASE ${TO_DATABASE_NAME};"
+$MYSQL_CMD -e "DROP DATABASE IF EXISTS ${FROM_DATABASE_NAME}; CREATE DATABASE ${FROM_DATABASE_NAME};"
+$MYSQL_CMD -e "DROP DATABASE IF EXISTS ${TO_DATABASE_NAME}; CREATE DATABASE ${TO_DATABASE_NAME};"
 
 # Setup db
-docker compose exec -T mysql mysql -u root "${FROM_DATABASE_NAME}" < seed/mysql2-dump.sql
-docker compose exec -T mysql mysql -u root "${TO_DATABASE_NAME}" < seed/mysql2-dump.sql
+$MYSQL_CMD "${FROM_DATABASE_NAME}" < seed/mysql2-dump.sql
+$MYSQL_CMD "${TO_DATABASE_NAME}" < seed/mysql2-dump.sql
 
 # run exwiw
 export DATABASE_PASSWORD="rootpassword"
@@ -30,10 +39,10 @@ bundle exec exe/exwiw \
 # import to db
 for file in tmp/mysql2/delete-*.sql; do
   echo "Run ${file}"
-  docker compose exec -T mysql mysql -u root "${TO_DATABASE_NAME}" < "${file}"
+  $MYSQL_CMD "${TO_DATABASE_NAME}" < "${file}"
 done
 
 for file in tmp/mysql2/insert-*.sql; do
   echo "Run ${file}"
-  docker compose exec -T mysql mysql -u root "${TO_DATABASE_NAME}" < "${file}"
+  $MYSQL_CMD "${TO_DATABASE_NAME}" < "${file}"
 done
