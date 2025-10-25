@@ -297,22 +297,11 @@ module Exwiw
 
       describe "import and insert" do
         let(:import_db_path) { 'tmp/test_import.sqlite3' }
-        let(:import_connection_config) do
-          ConnectionConfig.new(
-            adapter: adapter_name,
-            database_name: import_db_path,
-            host: nil,
-            port: nil,
-            user: nil,
-            password: nil,
-          )
-        end
-        let(:import_adapter) { described_class.new(import_connection_config, logger) }
 
         before do
           # Create a fresh empty database with schema
-          File.delete(import_connection_config.database_name) if File.exist?(import_connection_config.database_name)
-          conn = SQLite3::Database.new(import_connection_config.database_name)
+          File.delete(import_db_path) if File.exist?(import_db_path)
+          conn = SQLite3::Database.new(import_db_path)
 
           # Create shops table
           conn.execute(<<~SQL)
@@ -340,7 +329,7 @@ module Exwiw
         end
 
         after do
-          File.delete(import_connection_config.database_name) if File.exist?(import_connection_config.database_name)
+          File.delete(import_db_path) if File.exist?(import_db_path)
         end
 
         context "importing shops data" do
@@ -353,12 +342,13 @@ module Exwiw
             insert_sql = adapter.to_bulk_insert(results, shops_table(adapter_name))
 
             # Import into new database
-            conn = SQLite3::Database.new(import_connection_config.database_name)
+            conn = SQLite3::Database.new(import_db_path)
             conn.execute(insert_sql)
-            conn.close
 
             # Verify data was inserted
-            imported_results = import_adapter.execute(build_select_shops_ast)
+            imported_results = conn.execute("SELECT id, name, updated_at, created_at FROM shops WHERE id = 1")
+            conn.close
+
             expect(imported_results).to eq(results)
           end
         end
@@ -373,12 +363,13 @@ module Exwiw
             insert_sql = adapter.to_bulk_insert(results, users_table(adapter_name))
 
             # Import into new database
-            conn = SQLite3::Database.new(import_connection_config.database_name)
+            conn = SQLite3::Database.new(import_db_path)
             conn.execute(insert_sql)
-            conn.close
 
             # Verify data was inserted
-            imported_results = import_adapter.execute(build_select_users_ast)
+            imported_results = conn.execute("SELECT id, name, email, shop_id, updated_at, created_at FROM users WHERE shop_id = 1")
+            conn.close
+
             expect(imported_results).to eq(results)
 
             # Verify masking was applied (names should be masked)
@@ -398,18 +389,14 @@ module Exwiw
             insert_sql = adapter.to_bulk_insert(results, shops_table(adapter_name))
 
             # Import into new database
-            conn = SQLite3::Database.new(import_connection_config.database_name)
+            conn = SQLite3::Database.new(import_db_path)
             conn.execute(insert_sql)
-            conn.close
 
             # Verify data was inserted correctly with single quote preserved
-            conn = SQLite3::Database.new(import_connection_config.database_name)
             query_results = conn.execute("SELECT * FROM shops WHERE id = 999")
             conn.close
 
-            expect(query_results).to eq([
-              [999, "Shop's Name", "2025-01-01 00:00:00", "2025-01-01 00:00:00"]
-            ])
+            expect(query_results).to eq(results)
           end
         end
       end

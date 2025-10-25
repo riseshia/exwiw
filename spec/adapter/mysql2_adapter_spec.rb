@@ -313,39 +313,28 @@ module Exwiw
 
       describe "import and insert" do
         let(:import_db_name) { 'exwiw_test_import' }
-        let(:import_connection_config) do
-          ConnectionConfig.new(
-            adapter: adapter_name,
-            database_name: import_db_name,
-            host: '127.0.0.1',
-            port: 3306,
-            user: 'root',
-            password: 'rootpassword',
-          )
-        end
-        let(:import_adapter) { described_class.new(import_connection_config, logger) }
 
         before do
           skip if ENV["CI"]
 
           # Create a fresh empty database with schema
           conn = Mysql2::Client.new(
-            host: import_connection_config.host,
-            port: import_connection_config.port,
-            username: import_connection_config.user,
-            password: import_connection_config.password,
+            host: connection_config.host,
+            port: connection_config.port,
+            username: connection_config.user,
+            password: connection_config.password,
           )
 
-          conn.query("DROP DATABASE IF EXISTS #{import_connection_config.database_name}")
-          conn.query("CREATE DATABASE #{import_connection_config.database_name}")
+          conn.query("DROP DATABASE IF EXISTS #{import_db_name}")
+          conn.query("CREATE DATABASE #{import_db_name}")
           conn.close
 
           conn = Mysql2::Client.new(
-            host: import_connection_config.host,
-            port: import_connection_config.port,
-            username: import_connection_config.user,
-            password: import_connection_config.password,
-            database: import_connection_config.database_name,
+            host: connection_config.host,
+            port: connection_config.port,
+            username: connection_config.user,
+            password: connection_config.password,
+            database: import_db_name,
           )
 
           # Create shops table
@@ -377,12 +366,12 @@ module Exwiw
           skip if ENV["CI"]
 
           conn = Mysql2::Client.new(
-            host: import_connection_config.host,
-            port: import_connection_config.port,
-            username: import_connection_config.user,
-            password: import_connection_config.password,
+            host: connection_config.host,
+            port: connection_config.port,
+            username: connection_config.user,
+            password: connection_config.password,
           )
-          conn.query("DROP DATABASE IF EXISTS #{import_connection_config.database_name}")
+          conn.query("DROP DATABASE IF EXISTS #{import_db_name}")
           conn.close
         end
 
@@ -399,18 +388,21 @@ module Exwiw
 
             # Import into new database
             conn = Mysql2::Client.new(
-              host: import_connection_config.host,
-              port: import_connection_config.port,
-              username: import_connection_config.user,
-              password: import_connection_config.password,
-              database: import_connection_config.database_name,
+              host: connection_config.host,
+              port: connection_config.port,
+              username: connection_config.user,
+              password: connection_config.password,
+              database: import_db_name,
             )
             conn.query(insert_sql)
-            conn.close
 
             # Verify data was inserted
-            imported_results = import_adapter.execute(build_select_shops_ast)
-            expect(imported_results).to eq(results)
+            imported_results = conn.query("SELECT id, name, updated_at, created_at FROM shops WHERE id = 1").to_a
+            conn.close
+
+            # MySQL2 returns hash results, convert to array for comparison
+            imported_array = imported_results.map { |row| [row["id"].to_s, row["name"], row["updated_at"].to_s, row["created_at"].to_s] }
+            expect(imported_array).to eq(results)
           end
         end
 
@@ -427,22 +419,25 @@ module Exwiw
 
             # Import into new database
             conn = Mysql2::Client.new(
-              host: import_connection_config.host,
-              port: import_connection_config.port,
-              username: import_connection_config.user,
-              password: import_connection_config.password,
-              database: import_connection_config.database_name,
+              host: connection_config.host,
+              port: connection_config.port,
+              username: connection_config.user,
+              password: connection_config.password,
+              database: import_db_name,
             )
             conn.query(insert_sql)
-            conn.close
 
             # Verify data was inserted
-            imported_results = import_adapter.execute(build_select_users_ast)
-            expect(imported_results).to eq(results)
+            imported_results = conn.query("SELECT id, name, email, shop_id, updated_at, created_at FROM users WHERE shop_id = 1").to_a
+            conn.close
+
+            # MySQL2 returns hash results, convert to array for comparison
+            imported_array = imported_results.map { |row| [row["id"].to_s, row["name"], row["email"], row["shop_id"].to_s, row["updated_at"].to_s, row["created_at"].to_s] }
+            expect(imported_array).to eq(results)
 
             # Verify masking was applied (names should be masked)
-            expect(imported_results.first[1]).to eq("masked1")
-            expect(imported_results.first[2]).to eq("masked1@example.com")
+            expect(imported_results.first["name"]).to eq("masked1")
+            expect(imported_results.first["email"]).to eq("masked1@example.com")
           end
         end
 
@@ -460,23 +455,15 @@ module Exwiw
 
             # Import into new database
             conn = Mysql2::Client.new(
-              host: import_connection_config.host,
-              port: import_connection_config.port,
-              username: import_connection_config.user,
-              password: import_connection_config.password,
-              database: import_connection_config.database_name,
+              host: connection_config.host,
+              port: connection_config.port,
+              username: connection_config.user,
+              password: connection_config.password,
+              database: import_db_name,
             )
             conn.query(insert_sql)
-            conn.close
 
             # Verify data was inserted correctly with single quote preserved
-            conn = Mysql2::Client.new(
-              host: import_connection_config.host,
-              port: import_connection_config.port,
-              username: import_connection_config.user,
-              password: import_connection_config.password,
-              database: import_connection_config.database_name,
-            )
             query_results = conn.query("SELECT * FROM shops WHERE id = 999").to_a
             conn.close
 
