@@ -63,3 +63,15 @@ for file in tmp/postgresql/insert-*.sql; do
     docker compose exec postgres psql -U postgres -d "${TO_DATABASE_NAME}" -f "/scenario/${file}" > /dev/null
   fi
 done
+
+# Verify insert works after import
+echo "Testing insert after import..."
+$PSQL_CMD -d "${TO_DATABASE_NAME}" -c "INSERT INTO shops (id, name, updated_at, created_at) VALUES (999, 'Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');" > /dev/null
+COUNT=$($PSQL_CMD -d "${TO_DATABASE_NAME}" -t -c "SELECT COUNT(*) FROM shops WHERE id = 999;" | tr -d ' ')
+
+if [ "$COUNT" -eq "1" ]; then
+  echo "✓ Insert after import works correctly"
+else
+  echo "✗ Insert after import failed"
+  exit 1
+fi
