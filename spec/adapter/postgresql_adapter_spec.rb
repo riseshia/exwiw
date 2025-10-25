@@ -314,22 +314,22 @@ module Exwiw
 
           # Create a fresh empty database with schema
           conn = PG.connect(
-            host: '127.0.0.1',
-            port: 5432,
-            user: 'postgres',
-            password: 'test_password',
+            host: import_connection_config.host,
+            port: import_connection_config.port,
+            user: import_connection_config.user,
+            password: import_connection_config.password,
           )
 
-          conn.exec("DROP DATABASE IF EXISTS #{import_db_name}")
-          conn.exec("CREATE DATABASE #{import_db_name}")
+          conn.exec("DROP DATABASE IF EXISTS #{import_connection_config.database_name}")
+          conn.exec("CREATE DATABASE #{import_connection_config.database_name}")
           conn.close
 
           conn = PG.connect(
-            host: '127.0.0.1',
-            port: 5432,
-            user: 'postgres',
-            password: 'test_password',
-            dbname: import_db_name,
+            host: import_connection_config.host,
+            port: import_connection_config.port,
+            user: import_connection_config.user,
+            password: import_connection_config.password,
+            dbname: import_connection_config.database_name,
           )
 
           # Create shops table
@@ -361,12 +361,12 @@ module Exwiw
           skip if ENV["CI"]
 
           conn = PG.connect(
-            host: '127.0.0.1',
-            port: 5432,
-            user: 'postgres',
-            password: 'test_password',
+            host: import_connection_config.host,
+            port: import_connection_config.port,
+            user: import_connection_config.user,
+            password: import_connection_config.password,
           )
-          conn.exec("DROP DATABASE IF EXISTS #{import_db_name}")
+          conn.exec("DROP DATABASE IF EXISTS #{import_connection_config.database_name}")
           conn.close
         end
 
@@ -383,11 +383,11 @@ module Exwiw
 
             # Import into new database
             conn = PG.connect(
-              host: '127.0.0.1',
-              port: 5432,
-              user: 'postgres',
-              password: 'test_password',
-              dbname: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              user: import_connection_config.user,
+              password: import_connection_config.password,
+              dbname: import_connection_config.database_name,
             )
             conn.exec(insert_sql)
             conn.close
@@ -411,11 +411,11 @@ module Exwiw
 
             # Import into new database
             conn = PG.connect(
-              host: '127.0.0.1',
-              port: 5432,
-              user: 'postgres',
-              password: 'test_password',
-              dbname: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              user: import_connection_config.user,
+              password: import_connection_config.password,
+              dbname: import_connection_config.database_name,
             )
             conn.exec(insert_sql)
             conn.close
@@ -444,22 +444,22 @@ module Exwiw
 
             # Import into new database
             conn = PG.connect(
-              host: '127.0.0.1',
-              port: 5432,
-              user: 'postgres',
-              password: 'test_password',
-              dbname: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              user: import_connection_config.user,
+              password: import_connection_config.password,
+              dbname: import_connection_config.database_name,
             )
             conn.exec(insert_sql)
             conn.close
 
             # Verify data was inserted correctly with single quote preserved
             conn = PG.connect(
-              host: '127.0.0.1',
-              port: 5432,
-              user: 'postgres',
-              password: 'test_password',
-              dbname: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              user: import_connection_config.user,
+              password: import_connection_config.password,
+              dbname: import_connection_config.database_name,
             )
             query_results = conn.exec("SELECT * FROM shops WHERE id = 999").to_a
             conn.close

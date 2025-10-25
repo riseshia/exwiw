@@ -311,8 +311,8 @@ module Exwiw
 
         before do
           # Create a fresh empty database with schema
-          File.delete(import_db_path) if File.exist?(import_db_path)
-          conn = SQLite3::Database.new(import_db_path)
+          File.delete(import_connection_config.database_name) if File.exist?(import_connection_config.database_name)
+          conn = SQLite3::Database.new(import_connection_config.database_name)
 
           # Create shops table
           conn.execute(<<~SQL)
@@ -340,7 +340,7 @@ module Exwiw
         end
 
         after do
-          File.delete(import_db_path) if File.exist?(import_db_path)
+          File.delete(import_connection_config.database_name) if File.exist?(import_connection_config.database_name)
         end
 
         context "importing shops data" do
@@ -353,7 +353,7 @@ module Exwiw
             insert_sql = adapter.to_bulk_insert(results, shops_table(adapter_name))
 
             # Import into new database
-            conn = SQLite3::Database.new(import_db_path)
+            conn = SQLite3::Database.new(import_connection_config.database_name)
             conn.execute(insert_sql)
             conn.close
 
@@ -373,7 +373,7 @@ module Exwiw
             insert_sql = adapter.to_bulk_insert(results, users_table(adapter_name))
 
             # Import into new database
-            conn = SQLite3::Database.new(import_db_path)
+            conn = SQLite3::Database.new(import_connection_config.database_name)
             conn.execute(insert_sql)
             conn.close
 
@@ -398,12 +398,12 @@ module Exwiw
             insert_sql = adapter.to_bulk_insert(results, shops_table(adapter_name))
 
             # Import into new database
-            conn = SQLite3::Database.new(import_db_path)
+            conn = SQLite3::Database.new(import_connection_config.database_name)
             conn.execute(insert_sql)
             conn.close
 
             # Verify data was inserted correctly with single quote preserved
-            conn = SQLite3::Database.new(import_db_path)
+            conn = SQLite3::Database.new(import_connection_config.database_name)
             query_results = conn.execute("SELECT * FROM shops WHERE id = 999")
             conn.close
 

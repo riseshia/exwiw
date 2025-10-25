@@ -330,22 +330,22 @@ module Exwiw
 
           # Create a fresh empty database with schema
           conn = Mysql2::Client.new(
-            host: '127.0.0.1',
-            port: 3306,
-            username: 'root',
-            password: 'rootpassword',
+            host: import_connection_config.host,
+            port: import_connection_config.port,
+            username: import_connection_config.user,
+            password: import_connection_config.password,
           )
 
-          conn.query("DROP DATABASE IF EXISTS #{import_db_name}")
-          conn.query("CREATE DATABASE #{import_db_name}")
+          conn.query("DROP DATABASE IF EXISTS #{import_connection_config.database_name}")
+          conn.query("CREATE DATABASE #{import_connection_config.database_name}")
           conn.close
 
           conn = Mysql2::Client.new(
-            host: '127.0.0.1',
-            port: 3306,
-            username: 'root',
-            password: 'rootpassword',
-            database: import_db_name,
+            host: import_connection_config.host,
+            port: import_connection_config.port,
+            username: import_connection_config.user,
+            password: import_connection_config.password,
+            database: import_connection_config.database_name,
           )
 
           # Create shops table
@@ -377,12 +377,12 @@ module Exwiw
           skip if ENV["CI"]
 
           conn = Mysql2::Client.new(
-            host: '127.0.0.1',
-            port: 3306,
-            username: 'root',
-            password: 'rootpassword',
+            host: import_connection_config.host,
+            port: import_connection_config.port,
+            username: import_connection_config.user,
+            password: import_connection_config.password,
           )
-          conn.query("DROP DATABASE IF EXISTS #{import_db_name}")
+          conn.query("DROP DATABASE IF EXISTS #{import_connection_config.database_name}")
           conn.close
         end
 
@@ -399,11 +399,11 @@ module Exwiw
 
             # Import into new database
             conn = Mysql2::Client.new(
-              host: '127.0.0.1',
-              port: 3306,
-              username: 'root',
-              password: 'rootpassword',
-              database: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              username: import_connection_config.user,
+              password: import_connection_config.password,
+              database: import_connection_config.database_name,
             )
             conn.query(insert_sql)
             conn.close
@@ -427,11 +427,11 @@ module Exwiw
 
             # Import into new database
             conn = Mysql2::Client.new(
-              host: '127.0.0.1',
-              port: 3306,
-              username: 'root',
-              password: 'rootpassword',
-              database: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              username: import_connection_config.user,
+              password: import_connection_config.password,
+              database: import_connection_config.database_name,
             )
             conn.query(insert_sql)
             conn.close
@@ -460,22 +460,22 @@ module Exwiw
 
             # Import into new database
             conn = Mysql2::Client.new(
-              host: '127.0.0.1',
-              port: 3306,
-              username: 'root',
-              password: 'rootpassword',
-              database: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              username: import_connection_config.user,
+              password: import_connection_config.password,
+              database: import_connection_config.database_name,
             )
             conn.query(insert_sql)
             conn.close
 
             # Verify data was inserted correctly with single quote preserved
             conn = Mysql2::Client.new(
-              host: '127.0.0.1',
-              port: 3306,
-              username: 'root',
-              password: 'rootpassword',
-              database: import_db_name,
+              host: import_connection_config.host,
+              port: import_connection_config.port,
+              username: import_connection_config.user,
+              password: import_connection_config.password,
+              database: import_connection_config.database_name,
             )
             query_results = conn.query("SELECT * FROM shops WHERE id = 999").to_a
             conn.close
