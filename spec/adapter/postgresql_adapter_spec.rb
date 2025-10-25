@@ -361,8 +361,6 @@ module Exwiw
 
         context "importing shops data" do
           it "can insert exported data and query it back" do
-            skip if ENV["CI"]
-
             # Export data from source database
             results = adapter.execute(build_select_shops_ast)
             expect(results).not_to be_empty
@@ -392,8 +390,6 @@ module Exwiw
 
         context "importing users data with masking" do
           it "can insert exported masked data and query it back" do
-            skip if ENV["CI"]
-
             # Export data from source database (with masking applied)
             results = adapter.execute(build_select_users_ast)
             expect(results).not_to be_empty
@@ -427,8 +423,6 @@ module Exwiw
 
         context "importing data with special characters" do
           it "can insert data with single quotes" do
-            skip if ENV["CI"]
-
             # Create test data with single quote
             results = [
               ["999", "Shop's Name", "2025-01-01 00:00:00", "2025-01-01 00:00:00"]
