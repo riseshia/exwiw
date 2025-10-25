@@ -88,13 +88,17 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: 'updated_at' },
           { name: 'created_at' },
         ])
-        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
-          base_table_name: 'order_items',
-          foreign_key: 'order_id',
-          join_table_name: 'orders',
-          primary_key: 'id',
-          where_clauses: [{ column_name: 'shop_id', operator: :eq, value: [1] }] },
-        ])
+        # Verify join clause includes both the foreign key condition and the filter from orders table
+        join_clauses = built_query_ast.join_clauses.map(&:to_h)
+        expect(join_clauses.size).to eq(1)
+        expect(join_clauses[0][:base_table_name]).to eq('order_items')
+        expect(join_clauses[0][:foreign_key]).to eq('order_id')
+        expect(join_clauses[0][:join_table_name]).to eq('orders')
+        expect(join_clauses[0][:primary_key]).to eq('id')
+        # The where_clauses should contain both the shop_id condition and the filter string
+        expect(join_clauses[0][:where_clauses].size).to eq(2)
+        expect(join_clauses[0][:where_clauses][0]).to eq({ column_name: 'shop_id', operator: :eq, value: [1] })
+        expect(join_clauses[0][:where_clauses][1]).to eq('orders.id > 2')
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([])
       end
     end
@@ -112,13 +116,17 @@ RSpec.describe Exwiw::QueryAstBuilder do
           { name: 'updated_at' },
           { name: 'created_at' },
         ])
-        expect(built_query_ast.join_clauses.map(&:to_h)).to eq([{
-          base_table_name: 'transactions',
-          foreign_key: 'order_id',
-          join_table_name: 'orders',
-          primary_key: 'id',
-          where_clauses: [{ column_name: 'shop_id', operator: :eq, value: [1] }] },
-        ])
+        # Verify join clause includes both the foreign key condition and the filter from orders table
+        join_clauses = built_query_ast.join_clauses.map(&:to_h)
+        expect(join_clauses.size).to eq(1)
+        expect(join_clauses[0][:base_table_name]).to eq('transactions')
+        expect(join_clauses[0][:foreign_key]).to eq('order_id')
+        expect(join_clauses[0][:join_table_name]).to eq('orders')
+        expect(join_clauses[0][:primary_key]).to eq('id')
+        # The where_clauses should contain both the shop_id condition and the filter string
+        expect(join_clauses[0][:where_clauses].size).to eq(2)
+        expect(join_clauses[0][:where_clauses][0]).to eq({ column_name: 'shop_id', operator: :eq, value: [1] })
+        expect(join_clauses[0][:where_clauses][1]).to eq('orders.id > 2')
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([])
       end
     end
