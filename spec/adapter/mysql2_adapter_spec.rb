@@ -310,6 +310,181 @@ module Exwiw
           end
         end
       end
+
+      describe "import and insert" do
+        let(:import_db_name) { 'exwiw_test_import' }
+        let(:import_connection_config) do
+          ConnectionConfig.new(
+            adapter: adapter_name,
+            database_name: import_db_name,
+            host: '127.0.0.1',
+            port: 3306,
+            user: 'root',
+            password: 'rootpassword',
+          )
+        end
+        let(:import_adapter) { described_class.new(import_connection_config, logger) }
+
+        before do
+          skip if ENV["CI"]
+
+          # Create a fresh empty database with schema
+          conn = Mysql2::Client.new(
+            host: '127.0.0.1',
+            port: 3306,
+            username: 'root',
+            password: 'rootpassword',
+          )
+
+          conn.query("DROP DATABASE IF EXISTS #{import_db_name}")
+          conn.query("CREATE DATABASE #{import_db_name}")
+          conn.close
+
+          conn = Mysql2::Client.new(
+            host: '127.0.0.1',
+            port: 3306,
+            username: 'root',
+            password: 'rootpassword',
+            database: import_db_name,
+          )
+
+          # Create shops table
+          conn.query(<<~SQL)
+            CREATE TABLE shops (
+              id INT PRIMARY KEY,
+              name VARCHAR(255) NOT NULL,
+              updated_at DATETIME(6) NOT NULL,
+              created_at DATETIME(6) NOT NULL
+            )
+          SQL
+
+          # Create users table
+          conn.query(<<~SQL)
+            CREATE TABLE users (
+              id INT PRIMARY KEY,
+              name VARCHAR(255) NOT NULL,
+              email VARCHAR(255) NOT NULL,
+              shop_id INT NOT NULL,
+              updated_at DATETIME(6) NOT NULL,
+              created_at DATETIME(6) NOT NULL
+            )
+          SQL
+
+          conn.close
+        end
+
+        after do
+          skip if ENV["CI"]
+
+          conn = Mysql2::Client.new(
+            host: '127.0.0.1',
+            port: 3306,
+            username: 'root',
+            password: 'rootpassword',
+          )
+          conn.query("DROP DATABASE IF EXISTS #{import_db_name}")
+          conn.close
+        end
+
+        context "importing shops data" do
+          it "can insert exported data and query it back" do
+            skip if ENV["CI"]
+
+            # Export data from source database
+            results = adapter.execute(build_select_shops_ast)
+            expect(results).not_to be_empty
+
+            # Generate INSERT SQL
+            insert_sql = adapter.to_bulk_insert(results, shops_table(adapter_name))
+
+            # Import into new database
+            conn = Mysql2::Client.new(
+              host: '127.0.0.1',
+              port: 3306,
+              username: 'root',
+              password: 'rootpassword',
+              database: import_db_name,
+            )
+            conn.query(insert_sql)
+            conn.close
+
+            # Verify data was inserted
+            imported_results = import_adapter.execute(build_select_shops_ast)
+            expect(imported_results).to eq(results)
+          end
+        end
+
+        context "importing users data with masking" do
+          it "can insert exported masked data and query it back" do
+            skip if ENV["CI"]
+
+            # Export data from source database (with masking applied)
+            results = adapter.execute(build_select_users_ast)
+            expect(results).not_to be_empty
+
+            # Generate INSERT SQL
+            insert_sql = adapter.to_bulk_insert(results, users_table(adapter_name))
+
+            # Import into new database
+            conn = Mysql2::Client.new(
+              host: '127.0.0.1',
+              port: 3306,
+              username: 'root',
+              password: 'rootpassword',
+              database: import_db_name,
+            )
+            conn.query(insert_sql)
+            conn.close
+
+            # Verify data was inserted
+            imported_results = import_adapter.execute(build_select_users_ast)
+            expect(imported_results).to eq(results)
+
+            # Verify masking was applied (names should be masked)
+            expect(imported_results.first[1]).to eq("masked1")
+            expect(imported_results.first[2]).to eq("masked1@example.com")
+          end
+        end
+
+        context "importing data with special characters" do
+          it "can insert data with single quotes" do
+            skip if ENV["CI"]
+
+            # Create test data with single quote
+            results = [
+              ["999", "Shop's Name", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"]
+            ]
+
+            # Generate INSERT SQL
+            insert_sql = adapter.to_bulk_insert(results, shops_table(adapter_name))
+
+            # Import into new database
+            conn = Mysql2::Client.new(
+              host: '127.0.0.1',
+              port: 3306,
+              username: 'root',
+              password: 'rootpassword',
+              database: import_db_name,
+            )
+            conn.query(insert_sql)
+            conn.close
+
+            # Verify data was inserted correctly with single quote preserved
+            conn = Mysql2::Client.new(
+              host: '127.0.0.1',
+              port: 3306,
+              username: 'root',
+              password: 'rootpassword',
+              database: import_db_name,
+            )
+            query_results = conn.query("SELECT * FROM shops WHERE id = 999").to_a
+            conn.close
+
+            expect(query_results.first["id"]).to eq(999)
+            expect(query_results.first["name"]).to eq("Shop's Name")
+          end
+        end
+      end
     end
   end
 end
