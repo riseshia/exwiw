@@ -46,3 +46,15 @@ for file in tmp/mysql2/insert-*.sql; do
   echo "Run ${file}"
   $MYSQL_CMD "${TO_DATABASE_NAME}" < "${file}"
 done
+
+# Verify insert works after import
+echo "Testing insert after import..."
+$MYSQL_CMD "${TO_DATABASE_NAME}" -e "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"
+COUNT=$($MYSQL_CMD "${TO_DATABASE_NAME}" -sN -e "SELECT COUNT(*) FROM shops WHERE name = 'Test Shop';")
+
+if [ "$COUNT" -eq "1" ]; then
+  echo "✓ Insert after import works correctly (auto increment)"
+else
+  echo "✗ Insert after import failed"
+  exit 1
+fi
