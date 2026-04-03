@@ -20,7 +20,9 @@ module Exwiw
           join_table_name: join_table_name,
           primary_key: primary_key,
         }
-        hash[:where_clauses] = where_clauses.map(&:to_h) if where_clauses.size.positive?
+        if where_clauses.size.positive?
+          hash[:where_clauses] = where_clauses.map { |wc| wc.is_a?(String) ? wc : wc.to_h }
+        end
         hash
       end
     end

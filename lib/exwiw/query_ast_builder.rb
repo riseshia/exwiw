@@ -61,6 +61,11 @@ module Exwiw
           )
         end
 
+        # Add filter from intermediate table to join clause
+        if to_table.filter
+          join_clause.where_clauses.push to_table.filter
+        end
+
         join_clauses.push(join_clause)
       end
 
