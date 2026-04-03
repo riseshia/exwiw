@@ -52,9 +52,9 @@ namespace :exwiw do
         if File.exist?(path)
           current_config = Exwiw::TableConfig.from(JSON.parse(File.read(path)))
           merged_config = current_config.merge(table)
-          File.write(path, JSON.pretty_generate(merged_config.to_hash))
+          File.write(path, JSON.pretty_generate(merged_config.to_hash) + "\n")
         else
-          File.write(path, JSON.pretty_generate(table.to_hash))
+          File.write(path, JSON.pretty_generate(table.to_hash) + "\n")
         end
       end
     end

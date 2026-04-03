@@ -5,6 +5,7 @@
 ### Fixed
 
 - Skip models whose table does not exist in `exwiw:schema:generate` task.
+- Add trailing newline to generated schema files.
 
 ## [0.1.3] - 2025-04-02
 
