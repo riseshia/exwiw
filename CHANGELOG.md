@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Skip models whose table does not exist in `exwiw:schema:generate` task.
+
 ## [0.1.3] - 2025-04-02
 
 ### Fixed

@@ -14,6 +14,7 @@ namespace :exwiw do
 
       ActiveRecord::Base.descendants.each do |model|
         next if model.abstract_class?
+        next unless model.table_exists?
         next if table_by_name[model.table_name]
 
         belongs_tos = model.reflect_on_all_associations(:belongs_to).map do |assoc|
