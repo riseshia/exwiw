@@ -3,8 +3,8 @@ services:
     image: mysql:9
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: exwiw_test
-      MYSQL_PWD: rootpassword
     ports:
       - "3306:3306"
     volumes:
