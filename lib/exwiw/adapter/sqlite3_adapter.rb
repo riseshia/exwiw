@@ -79,7 +79,7 @@ module Exwiw
         sql += " FROM #{query_ast.from_table_name}"
 
         query_ast.join_clauses.each do |join|
-          sql += " JOIN #{join.join_table_name} ON #{query_ast.from_table_name}.#{join.foreign_key} = #{join.join_table_name}.#{join.primary_key}"
+          sql += " JOIN #{join.join_table_name} ON #{join.base_table_name}.#{join.foreign_key} = #{join.join_table_name}.#{join.primary_key}"
 
           join.where_clauses.each do |where|
             compiled_where_condition = compile_where_condition(where, join.join_table_name)

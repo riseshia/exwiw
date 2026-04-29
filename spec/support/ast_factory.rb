@@ -62,6 +62,39 @@ module AstFactory
     end
   end
 
+  def build_transactions_two_join_ast
+    transactions_table = transactions_table(adapter_name)
+
+    QueryAst::Select.new.tap do |ast|
+      ast.from(transactions_table.name)
+      ast.select(transactions_table.columns)
+      ast.join(
+        QueryAst::JoinClause.new(
+          base_table_name: "transactions",
+          foreign_key: "order_id",
+          join_table_name: "orders",
+          primary_key: "id",
+          where_clauses: [],
+        )
+      )
+      ast.join(
+        QueryAst::JoinClause.new(
+          base_table_name: "orders",
+          foreign_key: "shop_id",
+          join_table_name: "shops",
+          primary_key: "id",
+          where_clauses: [
+            QueryAst::WhereClause.new(
+              column_name: "id",
+              operator: :eq,
+              value: [1],
+            ),
+          ],
+        )
+      )
+    end
+  end
+
   def build_order_items_ast(order_items_filter_opt = nil, orders_filter_opt = nil)
     order_items_table = order_items_table(adapter_name)
 

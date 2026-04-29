@@ -81,6 +81,16 @@ module Exwiw
             )
           end
         end
+
+        context "select query with two joins" do
+          let(:sql) { adapter.compile_ast(build_transactions_two_join_ast) }
+
+          it "uses each join's base table on the left side of ON" do
+            expect(sql).to eq(
+              "SELECT transactions.id, transactions.type, transactions.amount, transactions.order_id, transactions.updated_at, transactions.created_at FROM transactions JOIN orders ON transactions.order_id = orders.id JOIN shops ON orders.shop_id = shops.id AND shops.id = 1"
+            )
+          end
+        end
       end
 
       describe "#execute" do
