@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'fileutils'
+require 'json'
 
 module Exwiw
   RSpec.describe Runner do
@@ -27,6 +29,59 @@ module Exwiw
 
     it 'writes bulk insert SQL to the output file' do
       expect { runner.run }.not_to raise_error
+    end
+
+    describe 'with bulk_insert_chunk_size' do
+      let(:config_dir) { 'tmp/runner_spec_config' }
+      let(:output_dir) { 'tmp/runner_spec_output' }
+      let(:dump_target) { DumpTarget.new(table_name: 'shops', ids: ['1', '2', '3', '4', '5']) }
+
+      before do
+        FileUtils.rm_rf(config_dir)
+        FileUtils.rm_rf(output_dir)
+        FileUtils.mkdir_p(config_dir)
+
+        shops_config = JSON.parse(File.read('scenario/sqlite3-schema/shops.json'))
+        shops_config['bulk_insert_chunk_size'] = 2
+        File.write(File.join(config_dir, 'shops.json'), JSON.dump(shops_config))
+      end
+
+      it 'splits INSERT statements into chunks within a single file' do
+        runner.run
+
+        sql_file = Dir[File.join(output_dir, 'insert-*-shops.sql')].first
+        expect(sql_file).not_to be_nil
+
+        sql = File.read(sql_file)
+        insert_statements = sql.scan(/INSERT INTO shops/)
+        expect(insert_statements.size).to eq(3)
+
+        expect(sql).to match(/INSERT INTO shops .+ VALUES\n\([^)]+\),\n\([^)]+\);/m)
+      end
+    end
+
+    describe 'without bulk_insert_chunk_size' do
+      let(:config_dir) { 'tmp/runner_spec_config_nochunk' }
+      let(:output_dir) { 'tmp/runner_spec_output_nochunk' }
+      let(:dump_target) { DumpTarget.new(table_name: 'shops', ids: ['1', '2', '3', '4', '5']) }
+
+      before do
+        FileUtils.rm_rf(config_dir)
+        FileUtils.rm_rf(output_dir)
+        FileUtils.mkdir_p(config_dir)
+
+        FileUtils.cp('scenario/sqlite3-schema/shops.json', File.join(config_dir, 'shops.json'))
+      end
+
+      it 'emits a single INSERT statement per table' do
+        runner.run
+
+        sql_file = Dir[File.join(output_dir, 'insert-*-shops.sql')].first
+        expect(sql_file).not_to be_nil
+
+        sql = File.read(sql_file)
+        expect(sql.scan(/INSERT INTO shops/).size).to eq(1)
+      end
     end
   end
 end

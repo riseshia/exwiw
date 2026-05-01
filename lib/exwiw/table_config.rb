@@ -9,6 +9,7 @@ module Exwiw
     attribute :filter, optional(String), skip_serializing_if_nil: true
     attribute :belongs_tos, array(BelongsTo)
     attribute :columns, array(TableColumn)
+    attribute :bulk_insert_chunk_size, optional(Integer), skip_serializing_if_nil: true
 
     def self.from_symbol_keys(hash)
       from(JSON.parse(hash.to_json))
@@ -74,6 +75,7 @@ module Exwiw
         merged_table.primary_key = passed_table.primary_key
         merged_table.filter = filter
         merged_table.belongs_tos = passed_table.belongs_tos
+        merged_table.bulk_insert_chunk_size = passed_table.bulk_insert_chunk_size
 
         receiver_column_by_name = columns.each_with_object({}) { |column, hash| hash[column.name] = column }
 

@@ -46,9 +46,11 @@ module Exwiw
         end
         @logger.debug("  Generate INSERT SQL...")
 
-        insert_sql = adapter.to_bulk_insert(results, table)
+        chunk_size = table.bulk_insert_chunk_size
+        chunks = chunk_size ? results.each_slice(chunk_size).to_a : [results]
+        insert_sql = chunks.map { |chunk_rows| adapter.to_bulk_insert(chunk_rows, table) }.join("\n")
 
-        @logger.info("  Generated INSERT SQL for #{record_num} records.")
+        @logger.info("  Generated INSERT SQL for #{record_num} records (#{chunks.size} statement(s)).")
         insert_idx = (idx + 1).to_s.rjust(3, '0')
         File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.sql"), 'w') do |file|
           file.puts(insert_sql)
