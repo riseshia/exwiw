@@ -35,6 +35,7 @@ module Exwiw
       let(:config_dir) { 'tmp/runner_spec_config' }
       let(:output_dir) { 'tmp/runner_spec_output' }
       let(:dump_target) { DumpTarget.new(table_name: 'shops', ids: ['1', '2', '3', '4', '5']) }
+      let(:insert_sql_regex) { /INSERT INTO shops .+ VALUES\n\([^)]+\)(?:,\n\([^)]+\))*;/ }
 
       before do
         FileUtils.rm_rf(config_dir)
@@ -52,11 +53,8 @@ module Exwiw
         sql_file = Dir[File.join(output_dir, 'insert-*-shops.sql')].first
         expect(sql_file).not_to be_nil
 
-        sql = File.read(sql_file)
-        insert_statements = sql.scan(/INSERT INTO shops/)
+        insert_statements = File.read(sql_file).scan(insert_sql_regex)
         expect(insert_statements.size).to eq(3)
-
-        expect(sql).to match(/INSERT INTO shops .+ VALUES\n\([^)]+\),\n\([^)]+\);/m)
       end
     end
 

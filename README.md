@@ -98,6 +98,7 @@ This is an example of the one table schema:
     "name": "users",
     "primary_key": "id",
     "filter": "users.id > 0",
+    "bulk_insert_chunk_size": 1000,
     "belongs_to": [{
         "name": "companies",
         "foreign_key": "company_id"
@@ -114,6 +115,12 @@ This is an example of the one table schema:
 ```
 
 `--config-dir` will use all json files in the specified directory.
+
+### Bulk insert chunk size
+
+`bulk_insert_chunk_size` splits the generated `INSERT` statement into multiple statements, each containing at most the specified number of rows. This is useful when the number of records per table is large enough to hit limits like MySQL's `max_allowed_packet`.
+
+If omitted, all records for a table are emitted as a single `INSERT` statement.
 
 ### Filter
 
