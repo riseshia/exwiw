@@ -11,7 +11,7 @@ if [ -n "$CI" ]; then
   MYSQL_CMD="mysql -h 127.0.0.1 -P 3306 -u root -prootpassword"
 else
   # Local environment: use docker compose exec
-  MYSQL_CMD="docker compose exec -T mysql mysql -u root"
+  MYSQL_CMD="docker compose exec -T mysql mysql -u root -prootpassword"
 fi
 
 # Clean up
