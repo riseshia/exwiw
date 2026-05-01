@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "Export What I Want (Exwiw) is a Ruby gem that allows you to export records from a database to a dump file."
   spec.homepage = "https://github.com/riseshia/exwiw"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 3.2.0"
+  spec.required_ruby_version = ">= 3.3.0"
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
