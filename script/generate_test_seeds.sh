@@ -14,13 +14,13 @@ sqlite3 tmp/seed.sqlite3 ".dump" > seed/sqlite3-dump.sql
 
 export DATABASE_NAME="exwiw_seed"
 
-docker compose exec mysql mysql -u root -prootpassword -e "DROP DATABASE IF EXISTS ${DATABASE_NAME}; CREATE DATABASE ${DATABASE_NAME};"
+docker compose exec -e MYSQL_PWD=rootpassword mysql mysql -u root -e "DROP DATABASE IF EXISTS ${DATABASE_NAME}; CREATE DATABASE ${DATABASE_NAME};"
 
 bundle exec ruby script/define_schema.rb "mysql2"
-docker compose exec mysql mysqldump -u root -prootpassword \
+docker compose exec -e MYSQL_PWD=rootpassword mysql mysqldump -u root \
   --no-data "${DATABASE_NAME}" > seed/mysql2-schema.sql
 bundle exec ruby script/generate_data.rb "mysql2"
-docker compose exec mysql mysqldump -u root -prootpassword \
+docker compose exec -e MYSQL_PWD=rootpassword mysql mysqldump -u root \
  "${DATABASE_NAME}" > seed/mysql2-dump.sql
 
 ## PostgreSQL

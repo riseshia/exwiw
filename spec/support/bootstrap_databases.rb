@@ -43,7 +43,7 @@ module BootstrapDatabases
       raise "Failed to setup mysql2 database" unless ret
     else
       # In local development, use docker compose
-      ret = system("docker compose exec -T mysql mysql -u #{username} -p#{password} #{database_name} < seed/mysql2-dump.sql")
+      ret = system("docker compose exec -T -e MYSQL_PWD=#{password} mysql mysql -u #{username} #{database_name} < seed/mysql2-dump.sql")
       raise "Failed to setup mysql2 database" unless ret
     end
   end
