@@ -79,10 +79,6 @@ module Exwiw
           end
         end
 
-        if @config_dir.nil?
-          $stderr.puts "Config dir is required"
-        end
-
         if @database_password.nil? || @database_password.empty?
           $stderr.puts "environment variable 'DATABASE_PASSWORD' is required"
           exit 1
@@ -92,6 +88,21 @@ module Exwiw
       valid_adapters = ["mysql2", "postgresql", "sqlite3"]
       unless valid_adapters.include?(@database_adapter)
         $stderr.puts "Invalid adapter. Available options are: #{valid_adapters.join(', ')}"
+        exit 1
+      end
+
+      if @config_dir.nil?
+        $stderr.puts "Config dir is required"
+        exit 1
+      end
+
+      unless Dir.exist?(@config_dir)
+        $stderr.puts "Config dir does not exist: #{@config_dir}"
+        exit 1
+      end
+
+      if Dir.glob(File.join(@config_dir, "*.json")).empty?
+        $stderr.puts "Config dir contains no .json files: #{@config_dir}"
         exit 1
       end
 
@@ -130,10 +141,12 @@ module Exwiw
         opts.on("-p", "--port=PORT", "Target database port") { |v| @database_port = v }
         opts.on("-u", "--user=USERNAME", "Target database user") { |v| @database_user = v }
         opts.on("-o", "--output-dir=[DUMP_DIR_PATH]", "Output file path. default is dump/") do |v|
-          @output_dir = v.end_with?("/") ? v[0..-2] : v
+          v = v.end_with?("/") ? v[0..-2] : v
+          @output_dir = File.expand_path(v)
         end
         opts.on("-c", "--config-dir=CONFIG_DIR_PATH", "Config dir path.") do |v|
-          @config_dir = v.end_with?("/") ? v[0..-2] : v
+          v = v.end_with?("/") ? v[0..-2] : v
+          @config_dir = File.expand_path(v)
         end
         opts.on("-a", "--adapter=ADAPTER", "Database adapter") { |v| @database_adapter = v }
         opts.on("--database=DATABASE", "Target database name") { |v| @database_name = v }
