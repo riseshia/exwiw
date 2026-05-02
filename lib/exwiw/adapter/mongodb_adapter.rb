@@ -2,6 +2,11 @@
 
 require 'json'
 
+# NOTE: This adapter assumes a "flat" document schema where references between
+# collections are expressed as scalar foreign keys (e.g. `shop_id` on `users`).
+# It has not been validated against real-world MongoDB applications that rely
+# heavily on embedded documents / arrays of subdocuments — the forward fan-out
+# strategy here cannot follow references that live inside embedded structures.
 module Exwiw
   module Adapter
     class MongodbAdapter < Base
