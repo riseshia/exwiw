@@ -67,25 +67,26 @@ module Exwiw
 
     private def validate_options!
       if @database_adapter != "sqlite3"
-        {
+        required_options = {
           "Target database host" => @database_host,
           "Target database port" => @database_port,
-          "Database user" => @database_user,
           "Target database name" => @database_name,
-        }.each do |k, v|
+        }
+        required_options["Database user"] = @database_user unless @database_adapter == "mongodb"
+        required_options.each do |k, v|
           if v.nil?
             $stderr.puts "#{k} is required"
             exit 1
           end
         end
 
-        if @database_password.nil? || @database_password.empty?
+        if @database_adapter != "mongodb" && (@database_password.nil? || @database_password.empty?)
           $stderr.puts "environment variable 'DATABASE_PASSWORD' is required"
           exit 1
         end
       end
 
-      valid_adapters = ["mysql2", "postgresql", "sqlite3"]
+      valid_adapters = ["mysql2", "postgresql", "sqlite3", "mongodb"]
       unless valid_adapters.include?(@database_adapter)
         $stderr.puts "Invalid adapter. Available options are: #{valid_adapters.join(', ')}"
         exit 1

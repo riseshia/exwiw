@@ -40,6 +40,7 @@ gem install exwiw
 - mysql2
 - postgresql
 - sqlite3
+- mongodb (experimental, see [MongoDB notes](#mongodb-notes))
 
 ## Usage
 
@@ -169,6 +170,21 @@ which is equivalent to `"replace_with": "user{id}@example.com"`.
 Notice this is the most powerful option, but you should be careful to use this option.
 Because this transformation occured on exwiw process, so much slower than other options.
 Most of case, this option is not recommended.
+
+### MongoDB notes
+
+The MongoDB adapter is experimental. To use it:
+
+- Add `gem "mongo"` to your Gemfile in addition to `exwiw` (it is not declared as a runtime dependency of the gem).
+- Set `--adapter=mongodb`. `--user` / `DATABASE_PASSWORD` are optional and only needed when your MongoDB requires authentication.
+- The schema JSON should set `"primary_key": "_id"` and list `_id` in `columns`. Foreign keys (`shop_id`, `user_id`, ...) stay as ordinary fields.
+- Output is JSON Lines (`insert-{idx}-{collection}.jsonl`) using MongoDB Extended JSON (relaxed mode). Import with `mongoimport`:
+  ```bash
+  mongoimport --db app_dev --collection users --file dump/insert-002-users.jsonl
+  ```
+- Unlike SQL adapters, the MongoDB adapter does not emit `delete-*.jsonl` files (drop the database / collection yourself before importing if needed).
+- `raw_sql` columns are not supported. Use `replace_with` for masking.
+- The MongoDB adapter does not support the table-level `filter` field (it raises `NotImplementedError` if set, since the SQL-string filter cannot be applied to MongoDB).
 
 ## How it works
 
