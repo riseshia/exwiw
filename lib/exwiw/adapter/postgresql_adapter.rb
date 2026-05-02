@@ -3,6 +3,10 @@
 module Exwiw
   module Adapter
     class PostgresqlAdapter < Base
+      def build_query(table, dump_target, table_by_name)
+        Exwiw::QueryAstBuilder.run(table.name, table_by_name, dump_target, @logger)
+      end
+
       def execute(query_ast)
         sql = compile_ast(query_ast)
 
