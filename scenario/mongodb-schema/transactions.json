@@ -1,0 +1,21 @@
+{
+  "name": "transactions",
+  "primary_key": "_id",
+  "belongs_tos": [{
+    "table_name": "orders",
+    "foreign_key": "order_id"
+  }],
+  "columns": [{
+    "name": "_id"
+  }, {
+    "name": "type"
+  }, {
+    "name": "amount"
+  }, {
+    "name": "order_id"
+  }, {
+    "name": "updated_at"
+  }, {
+    "name": "created_at"
+  }]
+}

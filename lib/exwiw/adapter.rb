@@ -54,6 +54,8 @@ module Exwiw
         Adapter::Mysql2Adapter.new(connection_config, logger)
       when 'postgresql'
         Adapter::PostgresqlAdapter.new(connection_config, logger)
+      when 'mongodb'
+        Adapter::MongodbAdapter.new(connection_config, logger)
       else
         raise 'Unsupported adapter'
       end

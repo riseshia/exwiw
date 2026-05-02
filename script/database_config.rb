@@ -19,6 +19,12 @@ DATABASE_CONFIGS = {
     username: ENV.fetch("POSTGRES_USERNAME", "postgres"),
     password: ENV.fetch("POSTGRES_PASSWORD", "test_password"),
   },
+  mongodb: {
+    adapter: "mongodb",
+    host: ENV.fetch("MONGO_HOST", "127.0.0.1"),
+    port: ENV.fetch("MONGO_PORT", 27017),
+    database: ENV.fetch("DATABASE_NAME", "exwiw_test"),
+  },
 }
 
 def database_config(adapter)

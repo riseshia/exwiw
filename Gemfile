@@ -12,6 +12,7 @@ gem "rspec"
 gem "mysql2"
 gem "pg"
 gem "sqlite3"
+gem "mongo"
 
 gem "activerecord"
 

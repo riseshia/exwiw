@@ -25,6 +25,8 @@ jobs:
       MYSQL_PORT: 3306
       POSTGRES_HOST: 127.0.0.1
       POSTGRES_PORT: 5432
+      MONGO_HOST: 127.0.0.1
+      MONGO_PORT: 27017
 
     services:
       mysql:
@@ -53,6 +55,16 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
+
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' | grep -q 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
       - uses: actions/checkout@v4

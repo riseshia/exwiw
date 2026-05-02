@@ -3,6 +3,8 @@
 require "sqlite3"
 require "mysql2"
 require "pg"
+require "mongo"
+require "json"
 
 require_relative "../../script/database_config"
 
@@ -13,6 +15,7 @@ module BootstrapDatabases
     setup_sqlite3
     setup_mysql2
     setup_postgres
+    setup_mongodb
   end
 
   private def setup_sqlite3
@@ -76,5 +79,25 @@ module BootstrapDatabases
       ret = system("docker compose exec postgres psql -U postgres -d '#{database_name}' -f /seed/postgresql-dump.sql > /dev/null")
       raise "Failed to setup postgres database" unless ret
     end
+  end
+
+  private def setup_mongodb
+    mongodb_config = database_config("mongodb")
+    database_name = mongodb_config.fetch(:database)
+    host = mongodb_config.fetch(:host)
+    port = mongodb_config.fetch(:port)
+
+    Mongo::Logger.logger.level = ::Logger::WARN
+
+    client = Mongo::Client.new(["#{host}:#{port}"], database: database_name)
+    client.database.drop
+
+    Dir.glob("seed/mongodb/*.jsonl").each do |path|
+      collection_name = File.basename(path, ".jsonl")
+      docs = File.readlines(path, chomp: true).reject(&:empty?).map { |line| JSON.parse(line) }
+      client[collection_name].insert_many(docs) unless docs.empty?
+    end
+
+    client.close
   end
 end
