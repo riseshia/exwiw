@@ -23,6 +23,10 @@ module Exwiw
           .each_with_object({}) { |t, h| h[t.name] = t }
       end
 
+      describe ".table_config_class" do
+        it { expect(described_class.table_config_class).to eq(MongodbCollectionConfig) }
+      end
+
       describe "#build_query" do
         context "for the dump_target table itself" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
@@ -66,24 +70,6 @@ module Exwiw
           end
         end
 
-        context "for a table with raw_sql column" do
-          let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
-          let(:bad_table) do
-            Exwiw::TableConfig.from_hash(
-              "name" => "bad",
-              "primary_key" => "_id",
-              "belongs_tos" => [],
-              "columns" => [
-                { "name" => "_id" },
-                { "name" => "raw", "raw_sql" => "CONCAT('a', 'b')" },
-              ],
-            )
-          end
-
-          it "raises NotImplementedError" do
-            expect { adapter.build_query(bad_table, dump_target, table_by_name) }.to raise_error(NotImplementedError)
-          end
-        end
       end
 
       describe "#execute" do

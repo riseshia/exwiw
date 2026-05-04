@@ -20,7 +20,7 @@ module Exwiw
 
     def run
       adapter = Adapter.build(@connection_config, @logger)
-      tables = load_table_config
+      tables = load_table_config(adapter.class.table_config_class)
 
       @logger.info("Determining table processing order...")
       ordered_table_names = DetermineTableProcessingOrder.run(tables)
@@ -72,10 +72,10 @@ module Exwiw
       end
     end
 
-    private def load_table_config
+    private def load_table_config(klass)
       Dir[File.join(@config_dir, "*.json")].map do |file|
         json = JSON.parse(File.read(file))
-        TableConfig.from(json)
+        klass.from(json)
       end
     end
 
