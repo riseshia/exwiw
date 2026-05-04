@@ -5,6 +5,7 @@ require "tmpdir"
 require "fileutils"
 require "json"
 require "active_record"
+require "sqlite3"
 
 require_relative "../script/database_config"
 
@@ -34,6 +35,31 @@ module Exwiw
 
     class ChildBelongsToUser < ParentNoBelongsTo
       belongs_to :user, class_name: "::User"
+    end
+  end
+
+  # Real multi-DB setup: two abstract bases each with their own
+  # AR connection, exercising connection_specification_name without
+  # any stubbing.
+  module SchemaGeneratorMultiDbFixtures
+    ANALYTICS_DB_PATH = "tmp/test_analytics.sqlite3"
+
+    class PrimaryAbstract < ::ActiveRecord::Base
+      self.abstract_class = true
+      establish_connection(adapter: "sqlite3", database: "tmp/test.sqlite3")
+    end
+
+    class AnalyticsAbstract < ::ActiveRecord::Base
+      self.abstract_class = true
+      establish_connection(adapter: "sqlite3", database: ANALYTICS_DB_PATH)
+    end
+
+    class PrimaryModel < PrimaryAbstract
+      self.table_name = "shops"
+    end
+
+    class AnalyticsModel < AnalyticsAbstract
+      self.table_name = "analytics_events"
     end
   end
 
@@ -131,13 +157,19 @@ module Exwiw
     end
 
     describe "multi-database detection" do
-      it "raises when concrete models point to different connection specifications" do
-        allow(Shop).to receive(:connection_specification_name).and_return("primary")
-        allow(Shop).to receive(:table_exists?).and_return(true)
-        allow(User).to receive(:connection_specification_name).and_return("analytics")
-        allow(User).to receive(:table_exists?).and_return(true)
+      before(:all) do
+        FileUtils.mkdir_p(File.dirname(SchemaGeneratorMultiDbFixtures::ANALYTICS_DB_PATH))
+        SQLite3::Database.new(SchemaGeneratorMultiDbFixtures::ANALYTICS_DB_PATH).execute_batch(<<~SQL)
+          CREATE TABLE IF NOT EXISTS analytics_events (id INTEGER PRIMARY KEY);
+        SQL
+      end
 
-        generator = described_class.new(models: [Shop, User], output_dir: output_dir)
+      it "raises when concrete models point to different connection specifications" do
+        models = [
+          SchemaGeneratorMultiDbFixtures::PrimaryModel,
+          SchemaGeneratorMultiDbFixtures::AnalyticsModel,
+        ]
+        generator = described_class.new(models: models, output_dir: output_dir)
         expect { generator.build_tables }
           .to raise_error(SchemaGenerator::MultipleDatabasesNotSupportedError, /multiple-database/)
       end
