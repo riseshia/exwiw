@@ -62,7 +62,7 @@ module Exwiw
     def aggregate_belongs_tos(models)
       pairs = models
         .flat_map { |m| m.reflect_on_all_associations(:belongs_to) }
-        .reject(&:polymorphic?)
+        .reject(&:polymorphic?) # XXX: Support polymorphic
         .map { |assoc| [assoc.table_name, assoc.foreign_key] }
         .uniq
 
