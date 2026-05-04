@@ -2,7 +2,7 @@
   "name": "system_announcements",
   "primary_key": "_id",
   "belongs_tos": [],
-  "columns": [{
+  "fields": [{
     "name": "_id"
   }, {
     "name": "title"

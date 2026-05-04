@@ -5,7 +5,7 @@
     "table_name": "shops",
     "foreign_key": "shop_id"
   }],
-  "columns": [{
+  "fields": [{
     "name": "_id"
   }, {
     "name": "name",

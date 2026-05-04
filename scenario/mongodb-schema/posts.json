@@ -1,0 +1,15 @@
+{
+  "name": "posts",
+  "primary_key": "_id",
+  "embedded_in": {
+    "collection_name": "users",
+    "path": "posts"
+  },
+  "belongs_tos": [],
+  "fields": [{
+    "name": "_id"
+  }, {
+    "name": "title",
+    "replace_with": "masked-title-{_id}"
+  }]
+}

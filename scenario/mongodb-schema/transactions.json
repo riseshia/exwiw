@@ -5,7 +5,7 @@
     "table_name": "orders",
     "foreign_key": "order_id"
   }],
-  "columns": [{
+  "fields": [{
     "name": "_id"
   }, {
     "name": "type"
