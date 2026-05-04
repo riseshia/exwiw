@@ -26,6 +26,11 @@ module Exwiw
         end
 
         reject_filter!(config)
+        # Stash the embedded-children index for the matching to_bulk_insert call
+        # below. The Adapter contract does not pass config_by_name to
+        # to_bulk_insert (SQL adapters don't need it), so we rely on the Runner
+        # invariant that build_query is always called before to_bulk_insert for
+        # the same config.
         @embedded_children_by_parent = index_embedded_children(config_by_name)
 
         filter =
@@ -63,6 +68,11 @@ module Exwiw
         docs
       end
 
+      # NOTE: relies on @embedded_children_by_parent set by a prior build_query
+      # call for the same config. This implicit ordering exists because the
+      # Adapter contract intentionally does not thread config_by_name through
+      # to_bulk_insert (SQL adapters don't need it). Safe in Runner, fragile in
+      # tests — call build_query first.
       def to_bulk_insert(rows, config)
         rows.map do |doc|
           apply_replace_with!(doc, config)
