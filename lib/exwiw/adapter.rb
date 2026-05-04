@@ -34,6 +34,18 @@ module Exwiw
       def supports_bulk_delete?
         true
       end
+
+      # Whether the given config produces its own dump output and needs an
+      # independent processing pass. SQL adapters always do; non-SQL adapters
+      # may exclude e.g. embedded subdocument configs.
+      def dumpable?(_config)
+        true
+      end
+
+      # Hook for adapter-specific validation when this config is used as the
+      # dump_target. Default: nothing to validate.
+      def validate_as_dump_target!(_config)
+      end
     end
 
     # @params [Exwiw::QueryAst] query_ast

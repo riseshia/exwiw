@@ -27,6 +27,33 @@ module Exwiw
         it { expect(described_class.table_config_class).to eq(MongodbCollectionConfig) }
       end
 
+      describe "#dumpable?" do
+        it "is true for top-level configs" do
+          users = config_by_name.fetch("users")
+          expect(adapter.dumpable?(users)).to eq(true)
+        end
+
+        it "is false for embedded configs" do
+          posts = config_by_name.fetch("posts")
+          expect(adapter.dumpable?(posts)).to eq(false)
+        end
+      end
+
+      describe "#validate_as_dump_target!" do
+        it "is a no-op for top-level configs" do
+          users = config_by_name.fetch("users")
+          expect { adapter.validate_as_dump_target!(users) }.not_to raise_error
+        end
+
+        it "raises NotImplementedError for embedded configs" do
+          posts = config_by_name.fetch("posts")
+          expect { adapter.validate_as_dump_target!(posts) }.to raise_error(
+            NotImplementedError,
+            /embedded MongodbCollectionConfig/,
+          )
+        end
+      end
+
       describe "#build_query" do
         context "for the dump_target collection itself" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }

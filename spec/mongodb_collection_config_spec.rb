@@ -109,54 +109,5 @@ module Exwiw
         expect(config.fields.first.name).to eq("_id")
       end
     end
-
-    describe '#dumpable?' do
-      it 'is true for top-level configs' do
-        config = described_class.from(
-          "name" => "users",
-          "primary_key" => "_id",
-          "belongs_tos" => [],
-          "fields" => [{ "name" => "_id" }],
-        )
-        expect(config.dumpable?).to eq(true)
-      end
-
-      it 'is false for embedded configs' do
-        config = described_class.from(
-          "name" => "posts",
-          "primary_key" => "_id",
-          "embedded_in" => { "collection_name" => "users", "path" => "posts" },
-          "belongs_tos" => [],
-          "fields" => [{ "name" => "_id" }],
-        )
-        expect(config.dumpable?).to eq(false)
-      end
-    end
-
-    describe '#validate_as_dump_target!' do
-      it 'is a no-op for top-level configs' do
-        config = described_class.from(
-          "name" => "users",
-          "primary_key" => "_id",
-          "belongs_tos" => [],
-          "fields" => [{ "name" => "_id" }],
-        )
-        expect { config.validate_as_dump_target! }.not_to raise_error
-      end
-
-      it 'raises NotImplementedError for embedded configs' do
-        config = described_class.from(
-          "name" => "posts",
-          "primary_key" => "_id",
-          "embedded_in" => { "collection_name" => "users", "path" => "posts" },
-          "belongs_tos" => [],
-          "fields" => [{ "name" => "_id" }],
-        )
-        expect { config.validate_as_dump_target! }.to raise_error(
-          NotImplementedError,
-          /embedded MongodbCollectionConfig/,
-        )
-      end
-    end
   end
 end

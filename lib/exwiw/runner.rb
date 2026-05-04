@@ -24,10 +24,11 @@ module Exwiw
 
       table_by_name = configs.each_with_object({}) { |config, hash| hash[config.name] = config }
 
-      table_by_name[@dump_target.table_name]&.validate_as_dump_target!
+      target = table_by_name[@dump_target.table_name]
+      adapter.validate_as_dump_target!(target) if target
 
       @logger.info("Determining table processing order...")
-      ordered_table_names = DetermineTableProcessingOrder.run(configs.select(&:dumpable?))
+      ordered_table_names = DetermineTableProcessingOrder.run(configs.select { |c| adapter.dumpable?(c) })
 
       if !Dir.exist?(@output_dir)
         FileUtils.mkdir_p(@output_dir)

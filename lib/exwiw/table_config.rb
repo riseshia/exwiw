@@ -15,18 +15,6 @@ module Exwiw
       from(JSON.parse(hash.to_json))
     end
 
-    # Whether this config produces its own dump output and needs an independent
-    # processing pass. SQL configs always do; non-SQL configs (e.g. MongoDB
-    # embedded subdocuments) override.
-    def dumpable?
-      true
-    end
-
-    # Hook for adapter-specific validation when this config is the dump_target.
-    # Default: nothing to validate.
-    def validate_as_dump_target!
-    end
-
     def column_names
       columns.map(&:name)
     end

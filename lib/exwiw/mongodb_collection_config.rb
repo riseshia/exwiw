@@ -34,18 +34,6 @@ module Exwiw
       !embedded_in.nil?
     end
 
-    def dumpable?
-      !embedded?
-    end
-
-    def validate_as_dump_target!
-      return unless embedded?
-
-      raise NotImplementedError,
-            "dump_target '#{name}' is an embedded MongodbCollectionConfig; " \
-            "specify a top-level collection instead."
-    end
-
     private def validate_embedded!
       return unless embedded?
       return if belongs_tos.empty?

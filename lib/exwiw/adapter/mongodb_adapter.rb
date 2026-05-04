@@ -18,6 +18,18 @@ module Exwiw
         @state = {}
       end
 
+      def dumpable?(config)
+        !config.embedded?
+      end
+
+      def validate_as_dump_target!(config)
+        return unless config.embedded?
+
+        raise NotImplementedError,
+              "dump_target '#{config.name}' is an embedded MongodbCollectionConfig; " \
+              "specify a top-level collection instead."
+      end
+
       def build_query(config, dump_target, config_by_name)
         if config.embedded?
           raise NotImplementedError,
