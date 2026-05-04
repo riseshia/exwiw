@@ -16,6 +16,7 @@ require_relative "exwiw/runner"
 require_relative "exwiw/belongs_to"
 require_relative "exwiw/table_column"
 require_relative "exwiw/table_config"
+require_relative "exwiw/schema_generator"
 
 begin
   require 'rails'
