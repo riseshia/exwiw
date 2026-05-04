@@ -26,7 +26,7 @@ module Exwiw
         end
 
         reject_filter!(config)
-        @config_by_name = config_by_name
+        @embedded_children_by_parent = index_embedded_children(config_by_name)
 
         filter =
           if config.name == dump_target.table_name
@@ -49,7 +49,7 @@ module Exwiw
           collection: config.name,
           primary_key: config.primary_key,
           filter: filter,
-          projection: build_projection(config, config_by_name),
+          projection: build_projection(config),
         )
       end
 
@@ -65,9 +65,10 @@ module Exwiw
 
       def to_bulk_insert(rows, config)
         rows.map do |doc|
-          materialized = apply_replace_with(doc, config)
-          apply_embedded_masking!(materialized, config)
-          JSON.generate(extended_json(materialized))
+          masked = doc.dup
+          apply_replace_with!(masked, config)
+          apply_embedded_masking!(masked, config)
+          JSON.generate(extended_json(masked))
         end.join("\n")
       end
 
@@ -103,7 +104,15 @@ module Exwiw
               "collection-level `filter` is not supported by MongodbAdapter (collection: #{config.name})"
       end
 
-      private def build_projection(config, config_by_name)
+      private def index_embedded_children(config_by_name)
+        config_by_name.each_value.with_object({}) do |child, acc|
+          next unless child.embedded?
+
+          (acc[child.embedded_in.collection_name] ||= []) << child
+        end
+      end
+
+      private def build_projection(config)
         projection = {}
         # Always include primary key so masking templates referencing it work,
         # even if it is not declared in fields.
@@ -113,43 +122,34 @@ module Exwiw
         end
         # Pull in paths owned by configs that mark themselves embedded in this
         # collection, so the masker sees the subdocuments.
-        config_by_name.each_value do |child|
-          next unless child.respond_to?(:embedded?) && child.embedded?
-          next unless child.embedded_in.collection_name == config.name
-
+        embedded_children_of(config).each do |child|
           projection[child.embedded_in.path] = 1
         end
         projection
       end
 
-      private def apply_replace_with(doc, config)
-        masked = doc.dup
-        apply_replace_with_in_place(masked, config)
-        masked
-      end
-
-      private def apply_replace_with_in_place(doc, config)
+      private def apply_replace_with!(doc, config)
         config.fields.each do |field|
           next unless field.replace_with
 
           doc[field.name] = field.replace_with.gsub(/\{([^{}]+)\}/) do
             ref = Regexp.last_match(1)
-            value = doc.key?(ref) ? doc[ref] : nil
-            value.to_s
+            (doc.key?(ref) ? doc[ref] : nil).to_s
           end
         end
       end
 
       private def apply_embedded_masking!(doc, parent_config)
-        @config_by_name.each_value do |child|
-          next unless child.respond_to?(:embedded?) && child.embedded?
-          next unless child.embedded_in.collection_name == parent_config.name
-
+        embedded_children_of(parent_config).each do |child|
           walk(doc, child.embedded_in.path) do |subdoc|
-            apply_replace_with_in_place(subdoc, child)
+            apply_replace_with!(subdoc, child)
             apply_embedded_masking!(subdoc, child)
           end
         end
+      end
+
+      private def embedded_children_of(parent_config)
+        @embedded_children_by_parent.fetch(parent_config.name, [])
       end
 
       private def walk(doc, dotted_path)

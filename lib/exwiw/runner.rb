@@ -24,10 +24,7 @@ module Exwiw
 
       table_by_name = configs.each_with_object({}) { |config, hash| hash[config.name] = config }
 
-      if @dump_target.respond_to?(:table_name)
-        target = table_by_name[@dump_target.table_name]
-        target&.validate_as_dump_target!
-      end
+      table_by_name[@dump_target.table_name]&.validate_as_dump_target!
 
       @logger.info("Determining table processing order...")
       ordered_table_names = DetermineTableProcessingOrder.run(configs.select(&:dumpable?))
