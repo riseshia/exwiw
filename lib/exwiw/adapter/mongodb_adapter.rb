@@ -2,28 +2,31 @@
 
 require 'json'
 
-# NOTE: This adapter assumes a "flat" document schema where references between
-# collections are expressed as scalar foreign keys (e.g. `shop_id` on `users`).
-# It has not been validated against real-world MongoDB applications that rely
-# heavily on embedded documents / arrays of subdocuments — the forward fan-out
-# strategy here cannot follow references that live inside embedded structures.
+# NOTE: This adapter consumes MongodbCollectionConfig (`fields` instead of
+# the SQL adapters' `columns`). It assumes a "flat" document schema where
+# references between collections are expressed as scalar foreign keys
+# (e.g. `shop_id` on `users`); the forward fan-out strategy here cannot
+# follow references that live inside embedded structures.
 module Exwiw
   module Adapter
     class MongodbAdapter < Base
+      def self.table_config_class
+        Exwiw::MongodbCollectionConfig
+      end
+
       def initialize(connection_config, logger)
         super
         @state = {}
       end
 
-      def build_query(table, dump_target, table_by_name)
-        reject_raw_sql_columns!(table)
-        reject_filter!(table)
+      def build_query(config, dump_target, _config_by_name)
+        reject_filter!(config)
 
         filter =
-          if table.name == dump_target.table_name
-            { table.primary_key => { "$in" => coerce_ids(dump_target.ids) } }
+          if config.name == dump_target.table_name
+            { config.primary_key => { "$in" => coerce_ids(dump_target.ids) } }
           else
-            constrained = table.belongs_tos.select do |relation|
+            constrained = config.belongs_tos.select do |relation|
               @state.key?(relation.table_name) && !@state[relation.table_name].empty?
             end
 
@@ -37,10 +40,10 @@ module Exwiw
           end
 
         Exwiw::MongoQuery::Find.new(
-          collection: table.name,
-          primary_key: table.primary_key,
+          collection: config.name,
+          primary_key: config.primary_key,
           filter: filter,
-          projection: build_projection(table),
+          projection: build_projection(config),
         )
       end
 
@@ -54,14 +57,14 @@ module Exwiw
         docs
       end
 
-      def to_bulk_insert(rows, table)
+      def to_bulk_insert(rows, config)
         rows.map do |doc|
-          materialized = apply_replace_with(doc, table)
-          JSON.generate(extended_json(materialized))
+          apply_replace_with!(doc, config)
+          JSON.generate(extended_json(doc))
         end.join("\n")
       end
 
-      def to_bulk_delete(_query, _table)
+      def to_bulk_delete(_query, _config)
         raise NotImplementedError, "MongodbAdapter does not support bulk delete"
       end
 
@@ -86,45 +89,33 @@ module Exwiw
         end
       end
 
-      private def reject_raw_sql_columns!(table)
-        raw = table.columns.select { |c| c.raw_sql }
-        return if raw.empty?
+      private def reject_filter!(config)
+        return if config.filter.nil? || config.filter.to_s.empty?
 
         raise NotImplementedError,
-              "raw_sql column is not supported by MongodbAdapter " \
-              "(table: #{table.name}, columns: #{raw.map(&:name).join(', ')})"
+              "collection-level `filter` is not supported by MongodbAdapter (collection: #{config.name})"
       end
 
-      private def reject_filter!(table)
-        return if table.filter.nil? || table.filter.to_s.empty?
-
-        raise NotImplementedError,
-              "table-level `filter` is not supported by MongodbAdapter (table: #{table.name})"
-      end
-
-      private def build_projection(table)
+      private def build_projection(config)
         projection = {}
         # Always include primary key so masking templates referencing it work,
-        # even if it is not declared in columns.
-        projection[table.primary_key] = 1
-        table.columns.each do |column|
-          projection[column.name] = 1
+        # even if it is not declared in fields.
+        projection[config.primary_key] = 1
+        config.fields.each do |field|
+          projection[field.name] = 1
         end
         projection
       end
 
-      private def apply_replace_with(doc, table)
-        masked = doc.dup
-        table.columns.each do |column|
-          next unless column.replace_with
+      private def apply_replace_with!(doc, config)
+        config.fields.each do |field|
+          next unless field.replace_with
 
-          masked[column.name] = column.replace_with.gsub(/\{([^{}]+)\}/) do
-            field = Regexp.last_match(1)
-            value = masked.key?(field) ? masked[field] : doc[field]
-            value.to_s
+          doc[field.name] = field.replace_with.gsub(/\{([^{}]+)\}/) do
+            ref = Regexp.last_match(1)
+            (doc.key?(ref) ? doc[ref] : nil).to_s
           end
         end
-        masked
       end
 
       private def extended_json(doc)

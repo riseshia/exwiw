@@ -10,6 +10,13 @@ module Exwiw
         @logger = logger
       end
 
+      # The config class that this adapter consumes. Runner uses this to
+      # decide which Serdes type to load scenario JSON into. SQL adapters
+      # share the SQL-shaped TableConfig; non-SQL adapters override.
+      def self.table_config_class
+        TableConfig
+      end
+
       # @params [Exwiw::TableConfig] table
       # @params [Exwiw::DumpTarget] dump_target
       # @params [Hash{String => Exwiw::TableConfig}] table_by_name
