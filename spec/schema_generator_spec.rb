@@ -46,7 +46,7 @@ module Exwiw
 
     class PrimaryAbstract < ::ActiveRecord::Base
       self.abstract_class = true
-      establish_connection(adapter: "sqlite3", database: "tmp/test.sqlite3")
+      establish_connection(adapter: "sqlite3", database: database_config("sqlite3").fetch(:database))
     end
 
     class AnalyticsAbstract < ::ActiveRecord::Base
