@@ -178,8 +178,8 @@ module Exwiw
       it "matches snapshot fixtures" do
         described_class.new(models: models, output_dir: output_dir).generate!
 
-        fixtures = Dir[File.join("spec/fixtures/schema", "*.json")].sort
-        expect(fixtures).not_to be_empty, "no snapshot fixtures found under spec/fixtures/schema"
+        fixtures = Dir[File.join("spec/schema_output_snapshots", "*.json")].sort
+        expect(fixtures).not_to be_empty, "no snapshot fixtures found under spec/schema_output_snapshots"
 
         fixtures.each do |fixture_path|
           actual_path = File.join(output_dir, File.basename(fixture_path))
