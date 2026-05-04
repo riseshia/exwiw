@@ -8,7 +8,7 @@
     "table_name": "products",
     "foreign_key": "product_id"
   }],
-  "columns": [{
+  "fields": [{
     "name": "_id"
   }, {
     "name": "quantity"
