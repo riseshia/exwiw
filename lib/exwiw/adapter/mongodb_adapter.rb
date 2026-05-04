@@ -2,28 +2,37 @@
 
 require 'json'
 
-# NOTE: This adapter assumes a "flat" document schema where references between
-# collections are expressed as scalar foreign keys (e.g. `shop_id` on `users`).
-# It has not been validated against real-world MongoDB applications that rely
-# heavily on embedded documents / arrays of subdocuments — the forward fan-out
-# strategy here cannot follow references that live inside embedded structures.
+# NOTE: This adapter consumes MongodbCollectionConfig (`fields` instead of
+# `columns`, plus `embedded_in`). Top-level collections are dumped as one
+# jsonl per collection; configs marked `embedded_in` are not dumped on their
+# own — their masking rules apply to subdocuments inside the parent.
 module Exwiw
   module Adapter
     class MongodbAdapter < Base
+      def self.table_config_class
+        Exwiw::MongodbCollectionConfig
+      end
+
       def initialize(connection_config, logger)
         super
         @state = {}
       end
 
-      def build_query(table, dump_target, table_by_name)
-        reject_raw_sql_columns!(table)
-        reject_filter!(table)
+      def build_query(config, dump_target, config_by_name)
+        if config.embedded?
+          raise NotImplementedError,
+                "MongodbAdapter#build_query was called with embedded config '#{config.name}'. " \
+                "Embedded configs are masked through the parent collection."
+        end
+
+        reject_filter!(config)
+        @config_by_name = config_by_name
 
         filter =
-          if table.name == dump_target.table_name
-            { table.primary_key => { "$in" => coerce_ids(dump_target.ids) } }
+          if config.name == dump_target.table_name
+            { config.primary_key => { "$in" => coerce_ids(dump_target.ids) } }
           else
-            constrained = table.belongs_tos.select do |relation|
+            constrained = config.belongs_tos.select do |relation|
               @state.key?(relation.table_name) && !@state[relation.table_name].empty?
             end
 
@@ -37,10 +46,10 @@ module Exwiw
           end
 
         Exwiw::MongoQuery::Find.new(
-          collection: table.name,
-          primary_key: table.primary_key,
+          collection: config.name,
+          primary_key: config.primary_key,
           filter: filter,
-          projection: build_projection(table),
+          projection: build_projection(config, config_by_name),
         )
       end
 
@@ -54,14 +63,15 @@ module Exwiw
         docs
       end
 
-      def to_bulk_insert(rows, table)
+      def to_bulk_insert(rows, config)
         rows.map do |doc|
-          materialized = apply_replace_with(doc, table)
+          materialized = apply_replace_with(doc, config)
+          apply_embedded_masking!(materialized, config)
           JSON.generate(extended_json(materialized))
         end.join("\n")
       end
 
-      def to_bulk_delete(_query, _table)
+      def to_bulk_delete(_query, _config)
         raise NotImplementedError, "MongodbAdapter does not support bulk delete"
       end
 
@@ -86,45 +96,73 @@ module Exwiw
         end
       end
 
-      private def reject_raw_sql_columns!(table)
-        raw = table.columns.select { |c| c.raw_sql }
-        return if raw.empty?
+      private def reject_filter!(config)
+        return if config.filter.nil? || config.filter.to_s.empty?
 
         raise NotImplementedError,
-              "raw_sql column is not supported by MongodbAdapter " \
-              "(table: #{table.name}, columns: #{raw.map(&:name).join(', ')})"
+              "collection-level `filter` is not supported by MongodbAdapter (collection: #{config.name})"
       end
 
-      private def reject_filter!(table)
-        return if table.filter.nil? || table.filter.to_s.empty?
-
-        raise NotImplementedError,
-              "table-level `filter` is not supported by MongodbAdapter (table: #{table.name})"
-      end
-
-      private def build_projection(table)
+      private def build_projection(config, config_by_name)
         projection = {}
         # Always include primary key so masking templates referencing it work,
-        # even if it is not declared in columns.
-        projection[table.primary_key] = 1
-        table.columns.each do |column|
-          projection[column.name] = 1
+        # even if it is not declared in fields.
+        projection[config.primary_key] = 1
+        config.fields.each do |field|
+          projection[field.name] = 1
+        end
+        # Pull in paths owned by configs that mark themselves embedded in this
+        # collection, so the masker sees the subdocuments.
+        config_by_name.each_value do |child|
+          next unless child.respond_to?(:embedded?) && child.embedded?
+          next unless child.embedded_in.collection_name == config.name
+
+          projection[child.embedded_in.path] = 1
         end
         projection
       end
 
-      private def apply_replace_with(doc, table)
+      private def apply_replace_with(doc, config)
         masked = doc.dup
-        table.columns.each do |column|
-          next unless column.replace_with
+        apply_replace_with_in_place(masked, config)
+        masked
+      end
 
-          masked[column.name] = column.replace_with.gsub(/\{([^{}]+)\}/) do
-            field = Regexp.last_match(1)
-            value = masked.key?(field) ? masked[field] : doc[field]
+      private def apply_replace_with_in_place(doc, config)
+        config.fields.each do |field|
+          next unless field.replace_with
+
+          doc[field.name] = field.replace_with.gsub(/\{([^{}]+)\}/) do
+            ref = Regexp.last_match(1)
+            value = doc.key?(ref) ? doc[ref] : nil
             value.to_s
           end
         end
-        masked
+      end
+
+      private def apply_embedded_masking!(doc, parent_config)
+        @config_by_name.each_value do |child|
+          next unless child.respond_to?(:embedded?) && child.embedded?
+          next unless child.embedded_in.collection_name == parent_config.name
+
+          walk(doc, child.embedded_in.path) do |subdoc|
+            apply_replace_with_in_place(subdoc, child)
+            apply_embedded_masking!(subdoc, child)
+          end
+        end
+      end
+
+      private def walk(doc, dotted_path)
+        segments = dotted_path.split(".")
+        *prefix, last = segments
+        container = prefix.reduce(doc) { |acc, seg| acc.is_a?(Hash) ? acc[seg] : nil }
+        return unless container.is_a?(Hash)
+
+        value = container[last]
+        case value
+        when Array then value.each { |sub| yield sub if sub.is_a?(Hash) }
+        when Hash  then yield value
+        end
       end
 
       private def extended_json(doc)

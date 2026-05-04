@@ -14,6 +14,7 @@ module TableLoader
     transactions
     reviews
     system_announcements
+    posts
   ].each do |table_name|
     define_method("#{table_name}_table") do |adapter|
       adapter = adapter.to_sym
@@ -24,7 +25,13 @@ module TableLoader
       raise "Table config not found: #{path}" unless File.exist?(path)
 
       json = JSON.parse(File.read(path))
-      table = Exwiw::TableConfig.from_hash(json)
+      klass =
+        if adapter == :mongodb
+          Exwiw::MongodbCollectionConfig
+        else
+          Exwiw::TableConfig
+        end
+      table = klass.from(json)
       table_repository[adapter][table_name] = table
     end
   end
