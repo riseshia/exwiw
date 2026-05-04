@@ -159,6 +159,7 @@ module Exwiw
     describe "multi-database detection" do
       before(:all) do
         FileUtils.mkdir_p(File.dirname(SchemaGeneratorMultiDbFixtures::ANALYTICS_DB_PATH))
+        # DIRTY: 後にseedで対応するようにする
         SQLite3::Database.new(SchemaGeneratorMultiDbFixtures::ANALYTICS_DB_PATH).execute_batch(<<~SQL)
           CREATE TABLE IF NOT EXISTS analytics_events (id INTEGER PRIMARY KEY);
         SQL
