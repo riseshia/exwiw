@@ -65,10 +65,9 @@ module Exwiw
 
       def to_bulk_insert(rows, config)
         rows.map do |doc|
-          masked = doc.dup
-          apply_replace_with!(masked, config)
-          apply_embedded_masking!(masked, config)
-          JSON.generate(extended_json(masked))
+          apply_replace_with!(doc, config)
+          apply_embedded_masking!(doc, config)
+          JSON.generate(extended_json(doc))
         end.join("\n")
       end
 
