@@ -8,7 +8,35 @@ require "active_record"
 
 require_relative "../script/database_config"
 
+# Synthetic STI fixtures for edge cases where the real script/models.rb
+# can't express the scenario (e.g. belongs_to only on parent, distinct
+# belongs_tos on different children). Anonymous Class.new doesn't work
+# here because AR reflections call `name.demodulize`.
 module Exwiw
+  module SchemaGeneratorStiFixtures
+    class ParentWithBelongsTo < ::ActiveRecord::Base
+      self.table_name = "orders"
+      self.inheritance_column = nil
+      belongs_to :shop, class_name: "::Shop"
+    end
+
+    class ChildOfParentWithBelongsTo < ParentWithBelongsTo
+    end
+
+    class ParentNoBelongsTo < ::ActiveRecord::Base
+      self.table_name = "orders"
+      self.inheritance_column = nil
+    end
+
+    class ChildBelongsToShop < ParentNoBelongsTo
+      belongs_to :shop, class_name: "::Shop"
+    end
+
+    class ChildBelongsToUser < ParentNoBelongsTo
+      belongs_to :user, class_name: "::User"
+    end
+  end
+
   RSpec.describe SchemaGenerator do
     before(:all) do
       ActiveRecord::Base.establish_connection(database_config(:sqlite3))
@@ -76,6 +104,29 @@ module Exwiw
 
         belongs_tos = transactions.belongs_tos.map { |b| [b.table_name, b.foreign_key] }
         expect(belongs_tos).to contain_exactly(["orders", "order_id"])
+      end
+
+      it "captures a belongs_to defined only on the STI parent (inherited via reflection)" do
+        models = [
+          SchemaGeneratorStiFixtures::ParentWithBelongsTo,
+          SchemaGeneratorStiFixtures::ChildOfParentWithBelongsTo,
+        ]
+        tables = described_class.new(models: models, output_dir: output_dir).build_tables
+
+        belongs_tos = tables.first.belongs_tos.map { |b| [b.table_name, b.foreign_key] }
+        expect(belongs_tos).to contain_exactly(["shops", "shop_id"])
+      end
+
+      it "retains distinct belongs_tos defined on separate STI children" do
+        models = [
+          SchemaGeneratorStiFixtures::ParentNoBelongsTo,
+          SchemaGeneratorStiFixtures::ChildBelongsToShop,
+          SchemaGeneratorStiFixtures::ChildBelongsToUser,
+        ]
+        tables = described_class.new(models: models, output_dir: output_dir).build_tables
+
+        belongs_tos = tables.first.belongs_tos.map { |b| [b.table_name, b.foreign_key] }
+        expect(belongs_tos).to contain_exactly(["shops", "shop_id"], ["users", "user_id"])
       end
     end
 
