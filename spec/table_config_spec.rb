@@ -52,7 +52,7 @@ module Exwiw
         it 'returns merged belongs_to' do
           actual = merged_config.belongs_tos
           expect(actual.map(&:to_hash)).to eq([
-            { 'table_name' => 'clients', 'foreign_key' => 'company_id' }
+            { 'table_name' => 'clients', 'foreign_key' => 'company_id' },
           ])
         end
       end
@@ -82,7 +82,7 @@ module Exwiw
         it 'prefer passed config data' do
           actual = merged_config.belongs_tos
           expect(actual.map(&:to_hash)).to eq([
-            { 'table_name' => 'clients', 'foreign_key' => 'merchant_id' }
+            { 'table_name' => 'clients', 'foreign_key' => 'merchant_id' },
           ])
         end
       end

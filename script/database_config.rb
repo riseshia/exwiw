@@ -18,7 +18,7 @@ DATABASE_CONFIGS = {
     database: ENV.fetch("DATABASE_NAME", "exwiw_test"),
     username: ENV.fetch("POSTGRES_USERNAME", "postgres"),
     password: ENV.fetch("POSTGRES_PASSWORD", "test_password"),
-  }
+  },
 }
 
 def database_config(adapter)

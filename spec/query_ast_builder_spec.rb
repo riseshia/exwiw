@@ -50,7 +50,7 @@ RSpec.describe Exwiw::QueryAstBuilder do
         ])
         expect(built_query_ast.join_clauses).to eq([])
         expect(built_query_ast.where_clauses.map(&:to_h)).to eq([
-          { column_name: 'id', operator: :eq, value: [1] }
+          { column_name: 'id', operator: :eq, value: [1] },
         ])
       end
     end

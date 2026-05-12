@@ -1,0 +1,10 @@
+plugins:
+  - rubocop-greppable_rails
+
+AllCops:
+  TargetRubyVersion: 3.3
+  DisabledByDefault: true
+  SuggestExtensions: false
+
+GreppableRails/UseInlineAccessModifier:
+  Enabled: true

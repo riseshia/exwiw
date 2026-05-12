@@ -55,7 +55,7 @@ module AstFactory
               column_name: "shop_id",
               operator: :eq,
               value: [1],
-            )
+            ),
           ],
         )
       )

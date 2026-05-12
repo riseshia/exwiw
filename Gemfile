@@ -14,3 +14,5 @@ gem "pg"
 gem "sqlite3"
 
 gem "activerecord"
+
+gem "rubocop-greppable_rails", "~> 1.0"
