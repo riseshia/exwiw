@@ -77,7 +77,7 @@ module Exwiw
 
       if table.name == dump_target.table_name
         clauses.push Exwiw::QueryAst::WhereClause.new(
-          column_name: 'id',
+          column_name: table.primary_key,
           operator: :eq,
           value: dump_target.ids
         )

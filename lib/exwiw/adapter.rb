@@ -9,6 +9,24 @@ module Exwiw
         @connection_config = connection_config
         @logger = logger
       end
+
+      # @params [Exwiw::TableConfig] table
+      # @params [Exwiw::DumpTarget] dump_target
+      # @params [Hash{String => Exwiw::TableConfig}] table_by_name
+      # @return [Object] adapter-specific query object (e.g. Exwiw::QueryAst::Select for SQL)
+      def build_query(table, dump_target, table_by_name)
+        raise NotImplementedError
+      end
+
+      # File extension used for dump output (e.g. 'sql' for SQL, 'jsonl' for MongoDB).
+      def output_extension
+        'sql'
+      end
+
+      # Whether this adapter emits delete-NNN-*.sql files.
+      def supports_bulk_delete?
+        true
+      end
     end
 
     # @params [Exwiw::QueryAst] query_ast

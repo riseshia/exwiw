@@ -36,7 +36,7 @@ module Exwiw
         @logger.info("Processing table '#{table_name}'... (#{idx + 1}/#{total_size})")
         table = table_by_name.fetch(table_name)
 
-        query_ast = QueryAstBuilder.run(table.name, table_by_name, @dump_target, @logger)
+        query_ast = adapter.build_query(table, @dump_target, table_by_name)
         results = adapter.execute(query_ast)
         record_num = results.size
 
@@ -44,28 +44,30 @@ module Exwiw
           @logger.info("  No records matched. skip this table.")
           next
         end
-        @logger.debug("  Generate INSERT SQL...")
+        @logger.debug("  Generate INSERT statement...")
 
         chunk_size = table.bulk_insert_chunk_size
         chunks = chunk_size ? results.each_slice(chunk_size).to_a : [results]
         insert_sql = chunks.map { |chunk_rows| adapter.to_bulk_insert(chunk_rows, table) }.join("\n")
 
-        @logger.info("  Generated INSERT SQL for #{record_num} records (#{chunks.size} statement(s)).")
+        @logger.info("  Generated INSERT statement for #{record_num} records (#{chunks.size} statement(s)).")
         insert_idx = (idx + 1).to_s.rjust(3, '0')
-        File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.sql"), 'w') do |file|
+        File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.#{adapter.output_extension}"), 'w') do |file|
           file.puts(insert_sql)
         end
 
-        @logger.debug("  Generate DELETE SQL...")
-        delete_sql = adapter.to_bulk_delete(query_ast, table)
-        if @logger.debug?
-          @logger.debug("  Generated DELETE SQL:\n#{delete_sql}")
-        else
-          @logger.info("  Generated DELETE SQL.")
-        end
-        delete_idx = (total_size - idx).to_s.rjust(3, '0')
-        File.open(File.join(@output_dir, "delete-#{delete_idx}-#{table_name}.sql"), 'w') do |file|
-          file.puts(delete_sql)
+        if adapter.supports_bulk_delete?
+          @logger.debug("  Generate DELETE statement...")
+          delete_sql = adapter.to_bulk_delete(query_ast, table)
+          if @logger.debug?
+            @logger.debug("  Generated DELETE statement:\n#{delete_sql}")
+          else
+            @logger.info("  Generated DELETE statement.")
+          end
+          delete_idx = (total_size - idx).to_s.rjust(3, '0')
+          File.open(File.join(@output_dir, "delete-#{delete_idx}-#{table_name}.#{adapter.output_extension}"), 'w') do |file|
+            file.puts(delete_sql)
+          end
         end
       end
     end
