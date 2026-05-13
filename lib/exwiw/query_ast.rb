@@ -32,7 +32,7 @@ module Exwiw
         {
           column_name: column_name,
           operator: operator,
-          value: value
+          value: value,
         }
       end
     end

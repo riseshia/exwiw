@@ -3,6 +3,8 @@
 require "sqlite3"
 require "mysql2"
 require "pg"
+require "mongo"
+require "json"
 
 require_relative "../../script/database_config"
 
@@ -13,6 +15,7 @@ module BootstrapDatabases
     setup_sqlite3
     setup_mysql2
     setup_postgres
+    setup_mongodb
   end
 
   private def setup_sqlite3
@@ -37,15 +40,8 @@ module BootstrapDatabases
     conn.query("DROP DATABASE IF EXISTS #{database_name}")
     conn.query("CREATE DATABASE #{database_name}")
 
-    if ENV["CI"]
-      # In CI with service containers, use mysql client directly
-      ret = system("mysql -h #{host} -P #{port} -u #{username} -p#{password} #{database_name} < seed/mysql2-dump.sql")
-      raise "Failed to setup mysql2 database" unless ret
-    else
-      # In local development, use docker compose
-      ret = system("docker compose exec -T -e MYSQL_PWD=#{password} mysql mysql -u #{username} #{database_name} < seed/mysql2-dump.sql")
-      raise "Failed to setup mysql2 database" unless ret
-    end
+    ret = system({"MYSQL_PWD" => password.to_s}, "mysql -h #{host} -P #{port} -u #{username} #{database_name} < seed/mysql2-dump.sql")
+    raise "Failed to setup mysql2 database" unless ret
   end
 
   private def setup_postgres
@@ -67,14 +63,27 @@ module BootstrapDatabases
     conn.exec("CREATE DATABASE #{database_name}")
     conn.close
 
-    if ENV["CI"]
-      # In CI with service containers, use psql directly
-      ret = system({"PGPASSWORD" => password}, "psql -h #{host} -p #{port} -U #{username} -d #{database_name} -f seed/postgresql-dump.sql > /dev/null")
-      raise "Failed to setup postgres database" unless ret
-    else
-      # In local development, use docker compose
-      ret = system("docker compose exec postgres psql -U postgres -d '#{database_name}' -f /seed/postgresql-dump.sql > /dev/null")
-      raise "Failed to setup postgres database" unless ret
+    ret = system({"PGPASSWORD" => password}, "psql -h #{host} -p #{port} -U #{username} -d #{database_name} -f seed/postgresql-dump.sql > /dev/null")
+    raise "Failed to setup postgres database" unless ret
+  end
+
+  private def setup_mongodb
+    mongodb_config = database_config("mongodb")
+    database_name = mongodb_config.fetch(:database)
+    host = mongodb_config.fetch(:host)
+    port = mongodb_config.fetch(:port)
+
+    Mongo::Logger.logger.level = ::Logger::WARN
+
+    client = Mongo::Client.new(["#{host}:#{port}"], database: database_name)
+    client.database.drop
+
+    Dir.glob("seed/mongodb/*.jsonl").each do |path|
+      collection_name = File.basename(path, ".jsonl")
+      docs = File.readlines(path, chomp: true).reject(&:empty?).map { |line| JSON.parse(line) }
+      client[collection_name].insert_many(docs) unless docs.empty?
     end
+
+    client.close
   end
 end

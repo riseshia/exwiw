@@ -1,0 +1,15 @@
+{"_id":1,"name":"Product 1","price":10,"shop_id":1,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":2,"name":"Product 2","price":20,"shop_id":1,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":3,"name":"Product 3","price":30,"shop_id":1,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":4,"name":"Product 1","price":10,"shop_id":2,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":5,"name":"Product 2","price":20,"shop_id":2,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":6,"name":"Product 3","price":30,"shop_id":2,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":7,"name":"Product 1","price":10,"shop_id":3,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":8,"name":"Product 2","price":20,"shop_id":3,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":9,"name":"Product 3","price":30,"shop_id":3,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":10,"name":"Product 1","price":10,"shop_id":4,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":11,"name":"Product 2","price":20,"shop_id":4,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":12,"name":"Product 3","price":30,"shop_id":4,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":13,"name":"Product 1","price":10,"shop_id":5,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":14,"name":"Product 2","price":20,"shop_id":5,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
+{"_id":15,"name":"Product 3","price":30,"shop_id":5,"created_at":"2025-01-01T00:00:00.000Z","updated_at":"2025-01-01T00:00:00.000Z"}
