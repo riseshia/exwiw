@@ -92,3 +92,34 @@ jobs:
 
       - name: Run exwiw
         run: scenario/test_with_postgresql.sh
+
+  with_mongodb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    name: Scenario with mongodb
+    env:
+      MONGO_HOST: 127.0.0.1
+      MONGO_PORT: 27017
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --quiet --eval 'db.runCommand({ ping: 1 }).ok' | grep -q 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+
+      - name: Run exwiw
+        run: scenario/test_with_mongodb.sh
