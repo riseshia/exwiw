@@ -21,6 +21,7 @@ require_relative "exwiw/mongo_query"
 require_relative "exwiw/query_ast"
 require_relative "exwiw/query_ast_builder"
 require_relative "exwiw/runner"
+require_relative "exwiw/schema_generator"
 
 begin
   require 'rails'
