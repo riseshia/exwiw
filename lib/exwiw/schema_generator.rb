@@ -53,13 +53,11 @@ module Exwiw
       end
     end
 
-    private
-
-    def concrete_models
+    private def concrete_models
       @models.reject(&:abstract_class?).select(&:table_exists?)
     end
 
-    def aggregate_belongs_tos(models)
+    private def aggregate_belongs_tos(models)
       pairs = models
         .flat_map { |m| m.reflect_on_all_associations(:belongs_to) }
         .reject(&:polymorphic?) # XXX: Support polymorphic
@@ -76,7 +74,7 @@ module Exwiw
     # descendant of the same abstract base shares one spec name regardless of
     # role/shard, so distinct values across concrete models indicate genuinely
     # separate databases.
-    def validate_single_database!(models)
+    private def validate_single_database!(models)
       return if models.empty?
 
       specs = models.map(&:connection_specification_name).uniq
