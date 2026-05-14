@@ -1,0 +1,19 @@
+{
+  "name": "shops",
+  "primary_key": "id",
+  "belongs_tos": [],
+  "columns": [
+    {
+      "name": "id"
+    },
+    {
+      "name": "name"
+    },
+    {
+      "name": "created_at"
+    },
+    {
+      "name": "updated_at"
+    }
+  ]
+}

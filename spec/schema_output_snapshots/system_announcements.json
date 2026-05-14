@@ -1,0 +1,22 @@
+{
+  "name": "system_announcements",
+  "primary_key": "id",
+  "belongs_tos": [],
+  "columns": [
+    {
+      "name": "id"
+    },
+    {
+      "name": "title"
+    },
+    {
+      "name": "content"
+    },
+    {
+      "name": "created_at"
+    },
+    {
+      "name": "updated_at"
+    }
+  ]
+}
