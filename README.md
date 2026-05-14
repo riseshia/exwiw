@@ -186,6 +186,44 @@ The MongoDB adapter is experimental. To use it:
 - `raw_sql` is not supported (the `MongodbField` schema does not declare it; any `raw_sql` keys in scenario JSON are silently dropped on load). Use `replace_with` for masking.
 - The MongoDB adapter does not support the collection-level `filter` field (it raises `NotImplementedError` if set, since the SQL-string filter cannot be applied to MongoDB).
 
+#### Embedded documents
+
+MongoDB models often store one-to-many relationships as embedded subdocument arrays (e.g. `users` documents with a `posts: [...]` field). To mask fields inside embedded subdocuments, declare a separate config with `embedded_in`:
+
+```jsonc
+// scenario/users.json — top-level collection
+{
+  "name": "users",
+  "primary_key": "_id",
+  "belongs_tos": [{ "table_name": "shops", "foreign_key": "shop_id" }],
+  "fields": [
+    { "name": "_id" },
+    { "name": "name", "replace_with": "masked{_id}" },
+    { "name": "shop_id" }
+  ]
+}
+
+// scenario/posts.json — embedded under users.posts
+{
+  "name": "posts",
+  "primary_key": "_id",
+  "embedded_in": { "collection_name": "users", "path": "posts" },
+  "belongs_tos": [],
+  "fields": [
+    { "name": "_id" },
+    { "name": "title", "replace_with": "masked-{_id}" }
+  ]
+}
+```
+
+At runtime:
+
+- `posts` is **not** dumped as its own jsonl file. Its `replace_with` rules are applied to the subdocuments inside the parent `users` document at the path `posts`.
+- `path` accepts dot-separated paths for nested fields (e.g. `"profile.contacts"`).
+- Both arrays of subdocuments and a single Hash subdocument at `path` are supported. Multiple levels of nesting work via embedded chains.
+- Cross-collection references from inside an embedded subdocument (`belongs_tos` on an embedded config) are not supported and raise `ArgumentError` on load.
+- Specifying an embedded config as `--target-table` raises `NotImplementedError`; pass the top-level collection name instead.
+
 ## How it works
 
 - Load the table information from the specified config file.

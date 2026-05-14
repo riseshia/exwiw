@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add embedded document support to the MongoDB adapter via `embedded_in: { collection_name, path }`. Embedded configs are not dumped as their own jsonl; their `replace_with` rules apply to subdocuments (Array or Hash, with multi-level nesting) inside the parent collection.
+
 ## [0.1.6] - 2026-03-14
 
 ### Added

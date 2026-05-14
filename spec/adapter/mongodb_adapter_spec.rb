@@ -17,8 +17,8 @@ module Exwiw
       let(:logger) { Logger.new(nil) }
       let(:adapter) { described_class.new(connection_config, logger) }
 
-      let(:table_by_name) do
-        %w[shops users products orders order_items transactions system_announcements]
+      let(:config_by_name) do
+        %w[shops users products orders order_items transactions system_announcements posts]
           .map { |n| send("#{n}_table", adapter_name) }
           .each_with_object({}) { |t, h| h[t.name] = t }
       end
@@ -27,13 +27,40 @@ module Exwiw
         it { expect(described_class.table_config_class).to eq(MongodbCollectionConfig) }
       end
 
+      describe "#dumpable?" do
+        it "is true for top-level configs" do
+          users = config_by_name.fetch("users")
+          expect(adapter.dumpable?(users)).to eq(true)
+        end
+
+        it "is false for embedded configs" do
+          posts = config_by_name.fetch("posts")
+          expect(adapter.dumpable?(posts)).to eq(false)
+        end
+      end
+
+      describe "#validate_as_dump_target!" do
+        it "is a no-op for top-level configs" do
+          users = config_by_name.fetch("users")
+          expect { adapter.validate_as_dump_target!(users) }.not_to raise_error
+        end
+
+        it "raises NotImplementedError for embedded configs" do
+          posts = config_by_name.fetch("posts")
+          expect { adapter.validate_as_dump_target!(posts) }.to raise_error(
+            NotImplementedError,
+            /embedded MongodbCollectionConfig/,
+          )
+        end
+      end
+
       describe "#build_query" do
-        context "for the dump_target table itself" do
+        context "for the dump_target collection itself" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
 
           it "filters by primary_key with $in" do
-            shops = table_by_name.fetch("shops")
-            query = adapter.build_query(shops, dump_target, table_by_name)
+            shops = config_by_name.fetch("shops")
+            query = adapter.build_query(shops, dump_target, config_by_name)
             expect(query.to_h).to eq(
               collection: "shops",
               primary_key: "_id",
@@ -43,42 +70,59 @@ module Exwiw
           end
         end
 
-        context "for a related table with no upstream state" do
+        context "for a related collection with no upstream state" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
 
           it "uses an empty filter (extracts everything)" do
-            users = table_by_name.fetch("users")
-            query = adapter.build_query(users, dump_target, table_by_name)
+            users = config_by_name.fetch("users")
+            query = adapter.build_query(users, dump_target, config_by_name)
             expect(query.filter).to eq({})
             expect(query.collection).to eq("users")
             expect(query.primary_key).to eq("_id")
           end
+
+          it "includes embedded child paths in projection" do
+            users = config_by_name.fetch("users")
+            query = adapter.build_query(users, dump_target, config_by_name)
+            expect(query.projection).to include("posts" => 1)
+            expect(query.projection).to include("_id" => 1, "name" => 1, "email" => 1, "shop_id" => 1)
+          end
         end
 
-        context "for a related table after upstream state is populated" do
+        context "for a related collection after upstream state is populated" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
 
           it "filters by foreign_key with $in using state from previous execute" do
-            shops = table_by_name.fetch("shops")
-            users = table_by_name.fetch("users")
+            shops = config_by_name.fetch("shops")
+            users = config_by_name.fetch("users")
 
-            shops_query = adapter.build_query(shops, dump_target, table_by_name)
+            shops_query = adapter.build_query(shops, dump_target, config_by_name)
             adapter.execute(shops_query)
 
-            users_query = adapter.build_query(users, dump_target, table_by_name)
+            users_query = adapter.build_query(users, dump_target, config_by_name)
             expect(users_query.filter).to eq("shop_id" => { "$in" => [1] })
           end
         end
 
+        context "when called with an embedded config" do
+          let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
+
+          it "raises NotImplementedError" do
+            posts = config_by_name.fetch("posts")
+            expect {
+              adapter.build_query(posts, dump_target, config_by_name)
+            }.to raise_error(NotImplementedError, /embedded/)
+          end
+        end
       end
 
       describe "#execute" do
-        context "for the dump_target table" do
+        context "for the dump_target collection" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
 
           it "returns matching documents" do
-            shops = table_by_name.fetch("shops")
-            query = adapter.build_query(shops, dump_target, table_by_name)
+            shops = config_by_name.fetch("shops")
+            query = adapter.build_query(shops, dump_target, config_by_name)
             results = adapter.execute(query)
             expect(results.size).to eq(1)
             expect(results.first["_id"]).to eq(1)
@@ -86,15 +130,15 @@ module Exwiw
           end
         end
 
-        context "for a related table after running the dump_target table" do
+        context "for a related collection after running the dump_target collection" do
           let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
 
           it "limits results via state-driven $in filter" do
-            shops = table_by_name.fetch("shops")
-            users_t = table_by_name.fetch("users")
+            shops = config_by_name.fetch("shops")
+            users_t = config_by_name.fetch("users")
 
-            adapter.execute(adapter.build_query(shops, dump_target, table_by_name))
-            users = adapter.execute(adapter.build_query(users_t, dump_target, table_by_name))
+            adapter.execute(adapter.build_query(shops, dump_target, config_by_name))
+            users = adapter.execute(adapter.build_query(users_t, dump_target, config_by_name))
 
             expect(users.size).to eq(2)
             expect(users.map { |u| u["shop_id"] }.uniq).to eq([1])
@@ -103,20 +147,125 @@ module Exwiw
       end
 
       describe "#to_bulk_insert" do
+        let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
+
+        before do
+          # Prime @config_by_name on the adapter so `to_bulk_insert` can resolve
+          # embedded children. Builds without executing — no DB required.
+          shops = config_by_name.fetch("shops")
+          adapter.build_query(shops, dump_target, config_by_name)
+        end
+
         it "applies replace_with templates and emits JSONL" do
-          users_t = table_by_name.fetch("users")
+          users_t = config_by_name.fetch("users")
+          adapter.build_query(users_t, dump_target, config_by_name)
           rows = [
             { "_id" => 1, "name" => "User 1", "email" => "user1@example.com", "shop_id" => 1 },
             { "_id" => 2, "name" => "User 2", "email" => "user2@example.com", "shop_id" => 1 },
           ]
           jsonl = adapter.to_bulk_insert(rows, users_t)
-          lines = jsonl.split("\n")
-          parsed = lines.map { |l| JSON.parse(l) }
+          parsed = jsonl.split("\n").map { |l| JSON.parse(l) }
 
           expect(parsed[0]["name"]).to eq("masked1")
           expect(parsed[0]["email"]).to eq("masked1@example.com")
           expect(parsed[1]["name"]).to eq("masked2")
           expect(parsed[1]["email"]).to eq("masked2@example.com")
+        end
+
+        it "applies embedded MongodbCollectionConfig replace_with to subdocument arrays" do
+          users_t = config_by_name.fetch("users")
+          adapter.build_query(users_t, dump_target, config_by_name)
+          rows = [
+            {
+              "_id" => 1,
+              "name" => "User 1",
+              "email" => "user1@example.com",
+              "shop_id" => 1,
+              "posts" => [
+                { "_id" => 101, "title" => "First" },
+                { "_id" => 102, "title" => "Second" },
+              ],
+            },
+          ]
+          jsonl = adapter.to_bulk_insert(rows, users_t)
+          parsed = JSON.parse(jsonl)
+
+          expect(parsed["posts"].map { |p| p["title"] }).to eq([
+            "masked-title-101",
+            "masked-title-102",
+          ])
+        end
+
+        it "applies embedded masking to a single Hash subdocument when path resolves to a Hash" do
+          single = MongodbCollectionConfig.from(
+            "name" => "profile",
+            "primary_key" => "_id",
+            "embedded_in" => { "collection_name" => "users", "path" => "profile" },
+            "belongs_tos" => [],
+            "fields" => [
+              { "name" => "_id" },
+              { "name" => "phone", "replace_with" => "masked-phone" },
+            ],
+          )
+          users_t = config_by_name.fetch("users")
+          local_config_by_name = config_by_name.merge("profile" => single)
+
+          adapter.build_query(users_t, dump_target, local_config_by_name)
+          rows = [
+            {
+              "_id" => 1,
+              "name" => "User 1",
+              "email" => "user1@example.com",
+              "shop_id" => 1,
+              "profile" => { "_id" => 999, "phone" => "+81-90-0000-0000" },
+            },
+          ]
+          jsonl = adapter.to_bulk_insert(rows, users_t)
+          parsed = JSON.parse(jsonl)
+          expect(parsed["profile"]["phone"]).to eq("masked-phone")
+        end
+
+        it "applies embedded masking recursively for multi-level nesting" do
+          comments = MongodbCollectionConfig.from(
+            "name" => "comments",
+            "primary_key" => "_id",
+            "embedded_in" => { "collection_name" => "posts", "path" => "comments" },
+            "belongs_tos" => [],
+            "fields" => [
+              { "name" => "_id" },
+              { "name" => "body", "replace_with" => "masked-comment-{_id}" },
+            ],
+          )
+          users_t = config_by_name.fetch("users")
+          local_config_by_name = config_by_name.merge("comments" => comments)
+
+          adapter.build_query(users_t, dump_target, local_config_by_name)
+          rows = [
+            {
+              "_id" => 1,
+              "name" => "User 1",
+              "email" => "u1@example.com",
+              "shop_id" => 1,
+              "posts" => [
+                {
+                  "_id" => 101,
+                  "title" => "First",
+                  "comments" => [
+                    { "_id" => 9001, "body" => "Hi" },
+                    { "_id" => 9002, "body" => "Hello" },
+                  ],
+                },
+              ],
+            },
+          ]
+          jsonl = adapter.to_bulk_insert(rows, users_t)
+          parsed = JSON.parse(jsonl)
+          comments_emitted = parsed["posts"].first["comments"]
+          expect(comments_emitted.map { |c| c["body"] }).to eq([
+            "masked-comment-9001",
+            "masked-comment-9002",
+          ])
+          expect(parsed["posts"].first["title"]).to eq("masked-title-101")
         end
       end
 
@@ -124,8 +273,8 @@ module Exwiw
         let(:dump_target) { Exwiw::DumpTarget.new(table_name: "shops", ids: [1]) }
 
         it "raises NotImplementedError" do
-          shops = table_by_name.fetch("shops")
-          query = adapter.build_query(shops, dump_target, table_by_name)
+          shops = config_by_name.fetch("shops")
+          query = adapter.build_query(shops, dump_target, config_by_name)
           expect { adapter.to_bulk_delete(query, shops) }.to raise_error(NotImplementedError)
         end
       end

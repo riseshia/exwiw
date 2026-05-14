@@ -16,7 +16,7 @@ module Exwiw
     end
     let(:output_dir) { 'tmp/test_output_dir' }
     let(:config_dir) { 'test_config' }
-    let(:dump_target) { double('DumpTarget') }
+    let(:dump_target) { DumpTarget.new(table_name: nil, ids: []) }
     let(:runner) do
       Runner.new(
         connection_config: connection_config,

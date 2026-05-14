@@ -3,10 +3,9 @@
 require 'json'
 
 # NOTE: This adapter consumes MongodbCollectionConfig (`fields` instead of
-# the SQL adapters' `columns`). It assumes a "flat" document schema where
-# references between collections are expressed as scalar foreign keys
-# (e.g. `shop_id` on `users`); the forward fan-out strategy here cannot
-# follow references that live inside embedded structures.
+# `columns`, plus `embedded_in`). Top-level collections are dumped as one
+# jsonl per collection; configs marked `embedded_in` are not dumped on their
+# own — their masking rules apply to subdocuments inside the parent.
 module Exwiw
   module Adapter
     class MongodbAdapter < Base
@@ -19,8 +18,32 @@ module Exwiw
         @state = {}
       end
 
-      def build_query(config, dump_target, _config_by_name)
+      def dumpable?(config)
+        !config.embedded?
+      end
+
+      def validate_as_dump_target!(config)
+        return unless config.embedded?
+
+        raise NotImplementedError,
+              "dump_target '#{config.name}' is an embedded MongodbCollectionConfig; " \
+              "specify a top-level collection instead."
+      end
+
+      def build_query(config, dump_target, config_by_name)
+        if config.embedded?
+          raise NotImplementedError,
+                "MongodbAdapter#build_query was called with embedded config '#{config.name}'. " \
+                "Embedded configs are masked through the parent collection."
+        end
+
         reject_filter!(config)
+        # Stash the embedded-children index for the matching to_bulk_insert call
+        # below. The Adapter contract does not pass config_by_name to
+        # to_bulk_insert (SQL adapters don't need it), so we rely on the Runner
+        # invariant that build_query is always called before to_bulk_insert for
+        # the same config.
+        @embedded_children_by_parent = index_embedded_children(config_by_name)
 
         filter =
           if config.name == dump_target.table_name
@@ -57,9 +80,15 @@ module Exwiw
         docs
       end
 
+      # NOTE: relies on @embedded_children_by_parent set by a prior build_query
+      # call for the same config. This implicit ordering exists because the
+      # Adapter contract intentionally does not thread config_by_name through
+      # to_bulk_insert (SQL adapters don't need it). Safe in Runner, fragile in
+      # tests — call build_query first.
       def to_bulk_insert(rows, config)
         rows.map do |doc|
           apply_replace_with!(doc, config)
+          apply_embedded_masking!(doc, config)
           JSON.generate(extended_json(doc))
         end.join("\n")
       end
@@ -96,6 +125,14 @@ module Exwiw
               "collection-level `filter` is not supported by MongodbAdapter (collection: #{config.name})"
       end
 
+      private def index_embedded_children(config_by_name)
+        config_by_name.each_value.with_object({}) do |child, acc|
+          next unless child.embedded?
+
+          (acc[child.embedded_in.collection_name] ||= []) << child
+        end
+      end
+
       private def build_projection(config)
         projection = {}
         # Always include primary key so masking templates referencing it work,
@@ -103,6 +140,11 @@ module Exwiw
         projection[config.primary_key] = 1
         config.fields.each do |field|
           projection[field.name] = 1
+        end
+        # Pull in paths owned by configs that mark themselves embedded in this
+        # collection, so the masker sees the subdocuments.
+        embedded_children_of(config).each do |child|
+          projection[child.embedded_in.path] = 1
         end
         projection
       end
@@ -115,6 +157,32 @@ module Exwiw
             ref = Regexp.last_match(1)
             (doc.key?(ref) ? doc[ref] : nil).to_s
           end
+        end
+      end
+
+      private def apply_embedded_masking!(doc, parent_config)
+        embedded_children_of(parent_config).each do |child|
+          walk(doc, child.embedded_in.path) do |subdoc|
+            apply_replace_with!(subdoc, child)
+            apply_embedded_masking!(subdoc, child)
+          end
+        end
+      end
+
+      private def embedded_children_of(parent_config)
+        @embedded_children_by_parent.fetch(parent_config.name, [])
+      end
+
+      private def walk(doc, dotted_path)
+        segments = dotted_path.split(".")
+        *prefix, last = segments
+        container = prefix.reduce(doc) { |acc, seg| acc.is_a?(Hash) ? acc[seg] : nil }
+        return unless container.is_a?(Hash)
+
+        value = container[last]
+        case value
+        when Array then value.each { |sub| yield sub if sub.is_a?(Hash) }
+        when Hash  then yield value
         end
       end
 

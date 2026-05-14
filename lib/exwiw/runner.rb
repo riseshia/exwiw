@@ -20,16 +20,19 @@ module Exwiw
 
     def run
       adapter = Adapter.build(@connection_config, @logger)
-      tables = load_table_config(adapter.class.table_config_class)
+      configs = load_table_config(adapter.class.table_config_class)
+
+      table_by_name = configs.each_with_object({}) { |config, hash| hash[config.name] = config }
+
+      target = table_by_name[@dump_target.table_name]
+      adapter.validate_as_dump_target!(target) if target
 
       @logger.info("Determining table processing order...")
-      ordered_table_names = DetermineTableProcessingOrder.run(tables)
+      ordered_table_names = DetermineTableProcessingOrder.run(configs.select { |c| adapter.dumpable?(c) })
 
       if !Dir.exist?(@output_dir)
         FileUtils.mkdir_p(@output_dir)
       end
-
-      table_by_name = tables.each_with_object({}) { |table, hash| hash[table.name] = table }
 
       total_size = ordered_table_names.size
       ordered_table_names.each_with_index do |table_name, idx|
