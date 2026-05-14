@@ -15,5 +15,3 @@ gem "sqlite3"
 gem "mongo"
 
 gem "activerecord"
-
-gem "rubocop-greppable_rails", "~> 1.0"
