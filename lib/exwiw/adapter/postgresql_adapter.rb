@@ -31,7 +31,6 @@ module Exwiw
           '--schema-only',
           '--no-owner',
           '--no-acl',
-          '--no-comments',
           *table_names.flat_map { |t| ['--table', t] },
           @connection_config.database_name,
         ]

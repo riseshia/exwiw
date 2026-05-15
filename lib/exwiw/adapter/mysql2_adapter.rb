@@ -30,6 +30,11 @@ module Exwiw
           "--user=#{@connection_config.user}",
           '--no-data',
           '--skip-add-drop-table',
+          # `--skip-comments` only suppresses the dump's header lines
+          # (e.g. `-- MySQL dump ...`, server version banner). Column and
+          # table `COMMENT '...'` clauses are emitted inline inside
+          # CREATE TABLE statements and are NOT affected, so this flag is
+          # purely about reducing noise in the generated file.
           '--skip-comments',
           '--skip-set-charset',
           # Suppress `SET @@GLOBAL.GTID_PURGED=...` from the dump. It is intended
