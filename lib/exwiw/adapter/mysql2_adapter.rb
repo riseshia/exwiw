@@ -32,6 +32,10 @@ module Exwiw
           '--skip-add-drop-table',
           '--skip-comments',
           '--skip-set-charset',
+          # Suppress `SET @@GLOBAL.GTID_PURGED=...` from the dump. It is intended
+          # for replication setup and breaks when the target already has GTIDs
+          # (ERROR 3546: added gtid set must not overlap with @@GLOBAL.GTID_EXECUTED).
+          '--set-gtid-purged=OFF',
           '--compact',
           @connection_config.database_name,
           *table_names,
