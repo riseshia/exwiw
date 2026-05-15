@@ -30,6 +30,22 @@ module Exwiw
         'sql'
       end
 
+      # File extension used for the leading `insert-000-schema.*` file.
+      # SQL adapters emit `.sql` (CREATE TABLE IF NOT EXISTS ...);
+      # MongodbAdapter overrides to `.js` (mongosh-runnable createCollection / createIndex).
+      def schema_output_extension
+        'sql'
+      end
+
+      # Write the leading schema-creation file for this adapter to `output_path`.
+      # Default is a no-op; subclasses override to emit idempotent DDL so the
+      # generated dump can be applied to an empty database.
+      #
+      # @param ordered_tables [Array] table configs in dependency order
+      # @param output_path [String] absolute path to write to
+      def dump_schema(ordered_tables, output_path)
+      end
+
       # Whether this adapter emits delete-NNN-*.sql files.
       def supports_bulk_delete?
         true

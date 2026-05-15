@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+
 module Exwiw
   module Adapter
     RSpec.describe PostgresqlAdapter do
@@ -16,6 +18,33 @@ module Exwiw
       end
       let(:logger) { Logger.new(nil) }
       let(:adapter) { described_class.new(connection_config, logger) }
+
+      describe "#dump_schema", if: system('which pg_dump >/dev/null 2>&1') do
+        let(:schema_path) { 'tmp/postgresql_schema_spec.sql' }
+        before { FileUtils.rm_f(schema_path) }
+        after { FileUtils.rm_f(schema_path) }
+
+        it "writes CREATE TABLE IF NOT EXISTS and wraps ADD CONSTRAINT in DO block" do
+          tables = [shops_table(adapter_name), users_table(adapter_name)]
+          begin
+            adapter.dump_schema(tables, schema_path)
+          rescue RuntimeError => e
+            # pg_dump enforces a strict server/client major-version match.
+            # Skip rather than fail when the local pg_dump is older than the test DB.
+            skip "pg_dump server/client version mismatch: #{e.message}" if e.message.include?('server version')
+            raise
+          end
+
+          sql = File.read(schema_path)
+          expect(sql).to match(/CREATE TABLE IF NOT EXISTS public\.shops/i).or(match(/CREATE TABLE IF NOT EXISTS shops/i))
+          expect(sql).to match(/CREATE TABLE IF NOT EXISTS public\.users/i).or(match(/CREATE TABLE IF NOT EXISTS users/i))
+          # If pg_dump emits any ADD CONSTRAINT lines, they must be wrapped in DO block
+          if sql =~ /ALTER TABLE/i
+            expect(sql).to include('DO $exwiw$')
+            expect(sql).to include('EXCEPTION WHEN duplicate_object')
+          end
+        end
+      end
 
       describe "#compile_ast" do
         context "simple select query" do

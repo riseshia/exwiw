@@ -34,6 +34,11 @@ module Exwiw
         FileUtils.mkdir_p(@output_dir)
       end
 
+      ordered_tables = ordered_table_names.map { |n| table_by_name.fetch(n) }
+      schema_path = File.join(@output_dir, "insert-000-schema.#{adapter.schema_output_extension}")
+      @logger.info("Writing schema to #{schema_path}...")
+      adapter.dump_schema(ordered_tables, schema_path)
+
       total_size = ordered_table_names.size
       ordered_table_names.each_with_index do |table_name, idx|
         @logger.info("Processing table '#{table_name}'... (#{idx + 1}/#{total_size})")

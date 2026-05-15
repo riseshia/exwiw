@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+
 module Exwiw
   module Adapter
     RSpec.describe Sqlite3Adapter do
@@ -16,6 +18,45 @@ module Exwiw
       end
       let(:logger) { Logger.new(nil) }
       let(:adapter) { described_class.new(connection_config, logger) }
+
+      describe "#schema_output_extension" do
+        it { expect(adapter.schema_output_extension).to eq('sql') }
+      end
+
+      describe "#dump_schema" do
+        let(:schema_path) { 'tmp/sqlite3_schema_spec.sql' }
+
+        before { FileUtils.rm_f(schema_path) }
+        after { FileUtils.rm_f(schema_path) }
+
+        it "writes idempotent CREATE TABLE/INDEX statements for the given tables" do
+          tables = [shops_table(adapter_name), users_table(adapter_name)]
+          adapter.dump_schema(tables, schema_path)
+
+          sql = File.read(schema_path)
+          expect(sql).to include('CREATE TABLE IF NOT EXISTS "shops"')
+          expect(sql).to include('CREATE TABLE IF NOT EXISTS "users"')
+          expect(sql).to include('CREATE INDEX IF NOT EXISTS "index_users_on_shop_id"')
+          # Tables not in ordered_tables are not emitted
+          expect(sql).not_to include('"products"')
+        end
+
+        it "emits tables in the provided order" do
+          tables = [users_table(adapter_name), shops_table(adapter_name)]
+          adapter.dump_schema(tables, schema_path)
+
+          sql = File.read(schema_path)
+          expect(sql.index('CREATE TABLE IF NOT EXISTS "users"')).to be < sql.index('CREATE TABLE IF NOT EXISTS "shops"')
+        end
+
+        it "is idempotent — re-running the produced SQL against the same DB does not raise" do
+          tables = [shops_table(adapter_name)]
+          adapter.dump_schema(tables, schema_path)
+          sql = File.read(schema_path)
+          # Strip comment lines (SQLite's execute_batch doesn't handle leading `--` cleanly in all versions but it's tolerant; keep raw).
+          expect { ::SQLite3::Database.new(connection_config.database_name).execute_batch(sql) }.not_to raise_error
+        end
+      end
 
       describe "#compile_ast" do
         context "simple select query" do
