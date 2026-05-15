@@ -86,14 +86,5 @@ module Exwiw
         klass.from(json)
       end
     end
-
-    private def build_adapter
-      case @connection_config["adapter"]
-      when "sqlite3"
-        Sqlite3Adapter.new(@connection_config)
-      else
-        raise "Unsupported adapter"
-      end
-    end
   end
 end
