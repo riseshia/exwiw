@@ -114,8 +114,6 @@ module Exwiw
           let(:results) { adapter.execute(build_select_shops_ast) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results).to eq([
               ["1", "Shop 1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
@@ -126,8 +124,6 @@ module Exwiw
           let(:results) { adapter.execute(build_select_users_ast) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results).to eq([
               ["1", "masked1", "masked1@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "masked2", "masked2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -139,8 +135,6 @@ module Exwiw
           let(:results) { adapter.execute(build_select_users_ast("users.id > 1")) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results).to eq([
               ["2", "masked2", "masked2@example.com", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
             ])
@@ -151,8 +145,6 @@ module Exwiw
           let(:results) { adapter.execute(build_order_items_ast) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results).to eq([
               ["1", "1", "1", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -168,8 +160,6 @@ module Exwiw
           let(:results) { adapter.execute(build_order_items_ast("order_items.id > 1", nil)) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results.to_a).to eq([
               ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["3", "1", "3", "3", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -184,8 +174,6 @@ module Exwiw
           let(:results) { adapter.execute(build_order_items_ast(nil, "orders.id < 6")) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results).to eq([
               ["1", "1", "1", "1", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
@@ -200,8 +188,6 @@ module Exwiw
           let(:results) { adapter.execute(build_order_items_ast("order_items.id > 1", "orders.id < 6")) }
 
           it "returns correct results" do
-            skip if ENV["CI"]
-
             expect(results).to eq([
               ["2", "1", "2", "2", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
               ["3", "1", "3", "3", "2025-01-01 00:00:00.000000", "2025-01-01 00:00:00.000000"],
