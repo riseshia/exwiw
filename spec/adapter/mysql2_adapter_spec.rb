@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'fileutils'
+require 'tempfile'
 
 module Exwiw
   module Adapter
@@ -19,10 +19,8 @@ module Exwiw
       let(:logger) { Logger.new(nil) }
       let(:adapter) { described_class.new(connection_config, logger) }
 
-      describe "#dump_schema", if: system('which mysqldump >/dev/null 2>&1') do
-        let(:schema_path) { 'tmp/mysql2_schema_spec.sql' }
-        before { FileUtils.rm_f(schema_path) }
-        after { FileUtils.rm_f(schema_path) }
+      describe "#dump_schema" do
+        let(:schema_path) { Tempfile.new(['mysql2_schema', '.sql']).path }
 
         it "writes CREATE TABLE IF NOT EXISTS for the requested tables" do
           tables = [shops_table(adapter_name), users_table(adapter_name)]

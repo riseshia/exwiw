@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'fileutils'
+require 'tempfile'
 
 module Exwiw
   module Adapter
@@ -24,10 +24,7 @@ module Exwiw
       end
 
       describe "#dump_schema" do
-        let(:schema_path) { 'tmp/sqlite3_schema_spec.sql' }
-
-        before { FileUtils.rm_f(schema_path) }
-        after { FileUtils.rm_f(schema_path) }
+        let(:schema_path) { Tempfile.new(['sqlite3_schema', '.sql']).path }
 
         it "writes idempotent CREATE TABLE/INDEX statements for the given tables" do
           tables = [shops_table(adapter_name), users_table(adapter_name)]

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'fileutils'
+require 'tempfile'
 
 module Exwiw
   module Adapter
@@ -290,9 +290,7 @@ module Exwiw
       end
 
       describe "#dump_schema" do
-        let(:schema_path) { 'tmp/mongodb_schema_spec.js' }
-        before { FileUtils.rm_f(schema_path) }
-        after { FileUtils.rm_f(schema_path) }
+        let(:schema_path) { Tempfile.new(['mongodb_schema', '.js']).path }
 
         it "emits createCollection wrapped in try/catch and createIndex for each non-embedded collection" do
           users = config_by_name.fetch("users")
