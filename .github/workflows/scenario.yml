@@ -24,6 +24,9 @@ jobs:
       - name: Run exwiw
         run: scenario/test_with_sqlite3.sh
 
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_sqlite3_from_clean.sh
+
   with_mysql:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -58,6 +61,9 @@ jobs:
       - name: Run exwiw
         run: scenario/test_with_mysql2.sh
 
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_mysql2_from_clean.sh
+
   with_postgres:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -84,6 +90,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install postgresql-client-17
+        # exwiw shells out to pg_dump to generate insert-000-schema.sql, and
+        # pg_dump enforces a strict major-version match with the server.
+        # ubuntu-latest's default pg_dump is older than 17, so install pgdg's pg17 client.
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          pg_dump --version
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -92,6 +110,9 @@ jobs:
 
       - name: Run exwiw
         run: scenario/test_with_postgresql.sh
+
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_postgresql_from_clean.sh
 
   with_mongodb:
     runs-on: ubuntu-latest

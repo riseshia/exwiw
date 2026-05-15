@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tempfile'
+
 module Exwiw
   module Adapter
     RSpec.describe MongodbAdapter do
@@ -281,6 +283,48 @@ module Exwiw
 
       describe "#output_extension" do
         it { expect(adapter.output_extension).to eq("jsonl") }
+      end
+
+      describe "#schema_output_extension" do
+        it { expect(adapter.schema_output_extension).to eq("js") }
+      end
+
+      describe "#dump_schema" do
+        let(:schema_path) { Tempfile.new(['mongodb_schema', '.js']).path }
+
+        it "emits createCollection wrapped in try/catch and createIndex for each non-embedded collection" do
+          users = config_by_name.fetch("users")
+          shops = config_by_name.fetch("shops")
+          posts = config_by_name.fetch("posts") # embedded — must be skipped
+
+          users_indexes = double('users_indexes', to_a: [
+            { 'v' => 2, 'key' => { '_id' => 1 }, 'name' => '_id_' },
+            { 'v' => 2, 'key' => { 'shop_id' => 1 }, 'name' => 'index_users_on_shop_id' },
+            { 'v' => 2, 'key' => { 'email' => 1 }, 'name' => 'unique_email', 'unique' => true, 'ns' => 'should-be-dropped' },
+          ])
+          shops_indexes = double('shops_indexes', to_a: [
+            { 'v' => 2, 'key' => { '_id' => 1 }, 'name' => '_id_' },
+          ])
+          users_view = double('users_view', indexes: users_indexes)
+          shops_view = double('shops_view', indexes: shops_indexes)
+          db_stub = double('db')
+          allow(db_stub).to receive(:[]).with('users').and_return(users_view)
+          allow(db_stub).to receive(:[]).with('shops').and_return(shops_view)
+          allow(adapter).to receive(:db).and_return(db_stub)
+
+          adapter.dump_schema([shops, users, posts], schema_path)
+
+          js = File.read(schema_path)
+          expect(js).to include('db.createCollection("shops")')
+          expect(js).to include('db.createCollection("users")')
+          expect(js).not_to include('db.createCollection("posts")') # embedded
+          expect(js).to include('e.code !== 48') # NamespaceExists swallowed
+          expect(js).to include('db.getCollection("users").createIndex({"shop_id":1}')
+          expect(js).to include('"name":"index_users_on_shop_id"')
+          expect(js).to include('"unique":true')
+          expect(js).not_to include('"ns":') # driver-internal field dropped
+          expect(js).not_to include('"_id_"') # auto _id_ index dropped
+        end
       end
 
       describe "#supports_bulk_delete?" do

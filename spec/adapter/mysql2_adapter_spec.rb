@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'tempfile'
+
 module Exwiw
   module Adapter
     RSpec.describe Mysql2Adapter do
@@ -16,6 +18,20 @@ module Exwiw
       end
       let(:logger) { Logger.new(nil) }
       let(:adapter) { described_class.new(connection_config, logger) }
+
+      describe "#dump_schema" do
+        let(:schema_path) { Tempfile.new(['mysql2_schema', '.sql']).path }
+
+        it "writes CREATE TABLE IF NOT EXISTS for the requested tables" do
+          tables = [shops_table(adapter_name), users_table(adapter_name)]
+          adapter.dump_schema(tables, schema_path)
+
+          sql = File.read(schema_path)
+          expect(sql).to match(/CREATE TABLE IF NOT EXISTS `shops`/i)
+          expect(sql).to match(/CREATE TABLE IF NOT EXISTS `users`/i)
+          expect(sql).not_to match(/`products`/) # not in scope
+        end
+      end
 
       describe "#compile_ast" do
         context "simple select query" do

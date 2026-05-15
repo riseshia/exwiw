@@ -56,6 +56,14 @@ module Exwiw
         insert_statements = File.read(sql_file).scan(insert_sql_regex)
         expect(insert_statements.size).to eq(3)
       end
+
+      it 'writes the leading insert-000-schema.sql with idempotent CREATE TABLE' do
+        runner.run
+
+        schema_file = File.join(output_dir, 'insert-000-schema.sql')
+        expect(File.exist?(schema_file)).to be(true)
+        expect(File.read(schema_file)).to include('CREATE TABLE IF NOT EXISTS "shops"')
+      end
     end
 
     describe 'without bulk_insert_chunk_size' do
