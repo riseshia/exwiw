@@ -24,6 +24,9 @@ jobs:
       - name: Run exwiw
         run: scenario/test_with_sqlite3.sh
 
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_sqlite3_from_clean.sh
+
   with_mysql:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -57,6 +60,9 @@ jobs:
 
       - name: Run exwiw
         run: scenario/test_with_mysql2.sh
+
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_mysql2_from_clean.sh
 
   with_postgres:
     runs-on: ubuntu-latest
@@ -104,6 +110,9 @@ jobs:
 
       - name: Run exwiw
         run: scenario/test_with_postgresql.sh
+
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_postgresql_from_clean.sh
 
   with_mongodb:
     runs-on: ubuntu-latest
