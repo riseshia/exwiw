@@ -3,6 +3,12 @@ require_relative './mongodb_client'
 database_name = ARGV.shift
 raise "database name required" if database_name.nil? || database_name.empty?
 
+# `--with-indexes` opts the from-clean scenario into checking that
+# insert-000-schema.js actually round-tripped the indexes seeded in
+# setup_with_mongodb.rb. The default scenario skips this because its import
+# step drops collections (and their indexes) before inserting jsonl.
+verify_indexes = ARGV.include?("--with-indexes")
+
 client = MongodbScenario.client(database_name)
 
 expected = {
@@ -51,6 +57,33 @@ if embedded_titles == expected_titles
 else
   puts "NG  users._id=1 embedded posts titles unexpected: #{embedded_titles.inspect}"
   failed = true
+end
+
+if verify_indexes
+  expected_indexes = {
+    "shops" => { "idx_shops_name" => { "key" => { "name" => 1 }, "unique" => true } },
+    "users" => { "idx_users_email" => { "key" => { "email" => 1 } } },
+    "orders" => { "idx_orders_shop_user" => { "key" => { "shop_id" => 1, "user_id" => 1 } } },
+  }
+
+  expected_indexes.each do |collection, indexes_by_name|
+    actual = client[collection].indexes.to_a.each_with_object({}) { |idx, h| h[idx["name"]] = idx }
+    indexes_by_name.each do |name, expected|
+      idx = actual[name]
+      if idx.nil?
+        puts "NG  #{collection} missing index #{name}"
+        failed = true
+        next
+      end
+      mismatches = expected.reject { |k, v| idx[k] == v }
+      if mismatches.empty?
+        puts "OK  #{collection} has index #{name}: #{expected.inspect}"
+      else
+        puts "NG  #{collection} index #{name} mismatch: expected #{expected.inspect}, got #{idx.slice(*expected.keys).inspect}"
+        failed = true
+      end
+    end
+  end
 end
 
 client.close

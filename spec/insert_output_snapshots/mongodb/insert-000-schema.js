@@ -8,3 +8,6 @@ try { db.createCollection("orders"); } catch (e) { if (e.code !== 48) throw e; }
 try { db.createCollection("order_items"); } catch (e) { if (e.code !== 48) throw e; }
 try { db.createCollection("transactions"); } catch (e) { if (e.code !== 48) throw e; }
 
+db.getCollection("shops").createIndex({"name":1}, {"unique":true,"name":"idx_shops_name"});
+db.getCollection("users").createIndex({"email":1}, {"name":"idx_users_email"});
+db.getCollection("orders").createIndex({"shop_id":1,"user_id":1}, {"name":"idx_orders_shop_user"});

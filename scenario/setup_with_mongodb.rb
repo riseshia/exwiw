@@ -14,4 +14,13 @@ Dir.glob("seed/mongodb/*.jsonl").each do |path|
   client[collection_name].insert_many(docs) unless docs.empty?
 end
 
+# Create representative indexes so dump_schema has something to emit and the
+# from-clean scenario can verify createIndex statements actually round-trip
+# through mongosh. Covers: a unique index, a plain index, and a compound index.
+# (shops.name is unique in the seed; users.email is *not* — same email
+# repeats across shops — so the unique flag lives on shops.)
+client["shops"].indexes.create_one({ "name" => 1 }, name: "idx_shops_name", unique: true)
+client["users"].indexes.create_one({ "email" => 1 }, name: "idx_users_email")
+client["orders"].indexes.create_one({ "shop_id" => 1, "user_id" => 1 }, name: "idx_orders_shop_user")
+
 client.close
