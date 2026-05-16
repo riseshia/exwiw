@@ -79,13 +79,12 @@ fi
 # Verify that the sequence was advanced past the explicit IDs we just
 # inserted. Each insert-*.sql appends a setval() so a follow-up INSERT that
 # relies on the default (nextval) does not collide with existing rows.
+# We use `if` (not a follow-up COUNT) because the failure mode is a duplicate
+# key error from psql — `set -e` would otherwise kill the script before we
+# could print a friendly diagnosis.
 echo "Testing insert (auto increment) after clean import..."
-$PSQL_CMD -d "${TO_DATABASE_NAME}" -c "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');" > /dev/null
-COUNT=$($PSQL_CMD -d "${TO_DATABASE_NAME}" -t -c "SELECT COUNT(*) FROM shops WHERE name = 'Test Shop';" | tr -d ' ')
-
-if [ "$COUNT" -eq "1" ]; then
-  echo "✓ Auto increment works after clean import"
-else
-  echo "✗ Auto increment failed after clean import"
+if ! $PSQL_CMD -d "${TO_DATABASE_NAME}" -c "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');" > /dev/null; then
+  echo "✗ Auto increment failed after clean import (sequence not advanced past imported IDs)"
   exit 1
 fi
+echo "✓ Auto increment works after clean import"
