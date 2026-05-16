@@ -81,6 +81,12 @@ module Exwiw
       # `is_called` directly (matching what pg_dump emits) rather than using
       # MAX(pk), so a subsetted dump still preserves the source's "next id".
       # Returns nil for non-auto-increment PKs (pg_get_serial_sequence -> NULL).
+      #
+      # Scope: ONLY the sequence attached to the primary key is synced. If a
+      # table has additional auto-increment columns (e.g. a non-PK SERIAL),
+      # those sequences are NOT transcribed and a subsequent default-value
+      # INSERT on them can collide. Rails-managed schemas don't hit this
+      # because only `id` is auto-increment, but bare PostgreSQL schemas may.
       def post_insert_sql(table)
         pk = table.primary_key
         return nil if pk.nil? || pk.empty?
