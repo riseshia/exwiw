@@ -54,13 +54,12 @@ fi
 
 # SQLite's INTEGER PRIMARY KEY (rowid alias) automatically picks MAX(id)+1
 # on next insert, so auto-increment should work after a clean import.
+# A failed INSERT makes sqlite3 exit non-zero, so we evaluate it directly
+# with `if` — `set -e` would otherwise kill the script before we could print
+# a friendly diagnosis.
 echo "Testing insert (auto increment) after clean import..."
-sqlite3 "$NEW_DB_PATH" "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"
-COUNT=$(sqlite3 "$NEW_DB_PATH" "SELECT COUNT(*) FROM shops WHERE name = 'Test Shop';")
-
-if [ "$COUNT" -eq "1" ]; then
-  echo "✓ Auto increment works after clean import"
-else
+if ! sqlite3 "$NEW_DB_PATH" "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"; then
   echo "✗ Auto increment failed after clean import"
   exit 1
 fi
+echo "✓ Auto increment works after clean import"

@@ -63,13 +63,12 @@ fi
 
 # MySQL advances the AUTO_INCREMENT counter automatically when explicit IDs
 # are inserted, so auto-increment should work after a clean import.
+# A failed INSERT makes mysql exit non-zero, so we evaluate it directly with
+# `if` — `set -e` would otherwise kill the script before we could print a
+# friendly diagnosis.
 echo "Testing insert (auto increment) after clean import..."
-$MYSQL_CMD "${TO_DATABASE_NAME}" -e "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"
-COUNT=$($MYSQL_CMD "${TO_DATABASE_NAME}" -sN -e "SELECT COUNT(*) FROM shops WHERE name = 'Test Shop';")
-
-if [ "$COUNT" -eq "1" ]; then
-  echo "✓ Auto increment works after clean import"
-else
-  echo "✗ Auto increment failed after clean import"
+if ! $MYSQL_CMD "${TO_DATABASE_NAME}" -e "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"; then
+  echo "✗ Auto increment failed after clean import (AUTO_INCREMENT not advanced past imported IDs)"
   exit 1
 fi
+echo "✓ Auto increment works after clean import"

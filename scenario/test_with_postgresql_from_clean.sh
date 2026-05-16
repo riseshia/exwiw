@@ -66,11 +66,6 @@ for file in tmp/postgresql-clean/insert-*.sql; do
 done
 
 # Verify that the schema was created and the target row landed.
-# We intentionally do NOT exercise auto-increment here: exwiw currently
-# doesn't emit `setval` for sequences, so on a freshly-created schema the
-# sequence stays at its initial position while inserted rows already occupy
-# those low IDs. That gap belongs to a follow-up on exwiw itself, not this
-# scenario test.
 echo "Verifying import to clean DB..."
 COUNT=$($PSQL_CMD -d "${TO_DATABASE_NAME}" -t -c "SELECT COUNT(*) FROM shops WHERE id = 1;" | tr -d ' ')
 
@@ -80,3 +75,16 @@ else
   echo "✗ Import into clean DB failed (expected 1 shop with id=1, got ${COUNT})"
   exit 1
 fi
+
+# Verify that the sequence was advanced past the explicit IDs we just
+# inserted. Each insert-*.sql appends a setval() so a follow-up INSERT that
+# relies on the default (nextval) does not collide with existing rows.
+# We use `if` (not a follow-up COUNT) because the failure mode is a duplicate
+# key error from psql — `set -e` would otherwise kill the script before we
+# could print a friendly diagnosis.
+echo "Testing insert (auto increment) after clean import..."
+if ! $PSQL_CMD -d "${TO_DATABASE_NAME}" -c "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');" > /dev/null; then
+  echo "✗ Auto increment failed after clean import (sequence not advanced past imported IDs)"
+  exit 1
+fi
+echo "✓ Auto increment works after clean import"

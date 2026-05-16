@@ -74,6 +74,36 @@ module Exwiw
         "INSERT INTO #{table_name} (#{column_names}) VALUES\n#{values};"
       end
 
+      # Transcribe the FROM-side sequence cursor backing `table.primary_key`
+      # onto the import target. Without this, importing into a clean DB leaves
+      # the sequence at 1 while the inserted rows occupy higher IDs, so the
+      # next default-PK INSERT collides. We query FROM's `last_value` /
+      # `is_called` directly (matching what pg_dump emits) rather than using
+      # MAX(pk), so a subsetted dump still preserves the source's "next id".
+      # Returns nil for non-auto-increment PKs (pg_get_serial_sequence -> NULL).
+      #
+      # Scope: ONLY the sequence attached to the primary key is synced. If a
+      # table has additional auto-increment columns (e.g. a non-PK SERIAL),
+      # those sequences are NOT transcribed and a subsequent default-value
+      # INSERT on them can collide. Rails-managed schemas don't hit this
+      # because only `id` is auto-increment, but bare PostgreSQL schemas may.
+      def post_insert_sql(table)
+        pk = table.primary_key
+        return nil if pk.nil? || pk.empty?
+
+        seq_name = connection
+          .exec_params("SELECT pg_get_serial_sequence($1, $2)", [table.name, pk])
+          .values.dig(0, 0)
+        return nil if seq_name.nil?
+
+        last_value, is_called = connection
+          .exec("SELECT last_value, is_called FROM #{seq_name}")
+          .values.first
+        is_called_sql = (is_called == 't' || is_called == true) ? 'true' : 'false'
+
+        "SELECT pg_catalog.setval('#{escape_single_quote(seq_name)}', #{last_value}, #{is_called_sql});"
+      end
+
       def to_bulk_delete(select_query_ast, table)
         raise NotImplementedError unless select_query_ast.is_a?(Exwiw::QueryAst::Select)
 

@@ -64,14 +64,14 @@ for file in tmp/postgresql/insert-*.sql; do
   fi
 done
 
-# Verify insert works after import
+# Verify insert works after import.
+# A failed INSERT (e.g. PK collision when the sequence wasn't advanced) makes
+# psql exit non-zero, so we evaluate it directly with `if` instead of doing a
+# follow-up COUNT — `set -e` would otherwise kill the script before we could
+# print a friendly diagnosis.
 echo "Testing insert after import..."
-$PSQL_CMD -d "${TO_DATABASE_NAME}" -c "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');" > /dev/null
-COUNT=$($PSQL_CMD -d "${TO_DATABASE_NAME}" -t -c "SELECT COUNT(*) FROM shops WHERE name = 'Test Shop';" | tr -d ' ')
-
-if [ "$COUNT" -eq "1" ]; then
-  echo "✓ Insert after import works correctly (auto increment)"
-else
+if ! $PSQL_CMD -d "${TO_DATABASE_NAME}" -c "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');" > /dev/null; then
   echo "✗ Insert after import failed"
   exit 1
 fi
+echo "✓ Insert after import works correctly (auto increment)"
