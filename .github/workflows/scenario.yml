@@ -136,6 +136,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install mongosh
+        # The mongo:7 service container has mongosh inside it, but the
+        # ubuntu-latest host does not. The from-clean scenario shells out to
+        # mongosh from the host to apply insert-000-schema.js, so install it
+        # via MongoDB's apt repo.
+        #
+        # The repo path is pinned to `jammy` rather than `$(lsb_release -cs)`
+        # because MongoDB's 7.0 apt index does not always carry an entry for
+        # the latest Ubuntu codename used by ubuntu-latest. mongosh itself is
+        # codename-agnostic, so the jammy build runs fine on newer hosts.
+        run: |
+          curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+          echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+          sudo apt-get update
+          sudo apt-get install -y mongodb-mongosh
+          mongosh --version
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -144,3 +161,6 @@ jobs:
 
       - name: Run exwiw
         run: scenario/test_with_mongodb.sh
+
+      - name: Run exwiw (from clean target DB)
+        run: scenario/test_with_mongodb_from_clean.sh
