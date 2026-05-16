@@ -47,14 +47,14 @@ for file in tmp/mysql2/insert-*.sql; do
   $MYSQL_CMD "${TO_DATABASE_NAME}" < "${file}"
 done
 
-# Verify insert works after import
+# Verify insert works after import.
+# A failed INSERT (e.g. PK collision when AUTO_INCREMENT wasn't advanced)
+# makes mysql exit non-zero, so we evaluate it directly with `if` instead of
+# doing a follow-up COUNT — `set -e` would otherwise kill the script before
+# we could print a friendly diagnosis.
 echo "Testing insert after import..."
-$MYSQL_CMD "${TO_DATABASE_NAME}" -e "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"
-COUNT=$($MYSQL_CMD "${TO_DATABASE_NAME}" -sN -e "SELECT COUNT(*) FROM shops WHERE name = 'Test Shop';")
-
-if [ "$COUNT" -eq "1" ]; then
-  echo "✓ Insert after import works correctly (auto increment)"
-else
+if ! $MYSQL_CMD "${TO_DATABASE_NAME}" -e "INSERT INTO shops (name, updated_at, created_at) VALUES ('Test Shop', '2025-01-01 00:00:00', '2025-01-01 00:00:00');"; then
   echo "✗ Insert after import failed"
   exit 1
 fi
+echo "✓ Insert after import works correctly (auto increment)"
