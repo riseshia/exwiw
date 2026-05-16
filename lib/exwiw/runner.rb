@@ -62,6 +62,8 @@ module Exwiw
         insert_idx = (idx + 1).to_s.rjust(3, '0')
         File.open(File.join(@output_dir, "insert-#{insert_idx}-#{table_name}.#{adapter.output_extension}"), 'w') do |file|
           file.puts(insert_sql)
+          post = adapter.post_insert_sql(table)
+          file.puts(post) if post
         end
 
         if adapter.supports_bulk_delete?

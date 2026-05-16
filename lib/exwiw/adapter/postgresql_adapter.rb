@@ -74,6 +74,28 @@ module Exwiw
         "INSERT INTO #{table_name} (#{column_names}) VALUES\n#{values};"
       end
 
+      # Advance the sequence backing `table.primary_key` (if any) to MAX(pk).
+      # Without this, importing into a clean DB leaves the sequence at 1 while
+      # the inserted rows occupy low IDs, so the next default-PK INSERT
+      # collides. `pg_get_serial_sequence` covers both SERIAL and IDENTITY; it
+      # returns NULL for non-auto-increment PKs, in which case we no-op.
+      def post_insert_sql(table)
+        table_name = table.name
+        pk = table.primary_key
+        return nil if pk.nil? || pk.empty?
+
+        <<~SQL.chomp
+          DO $exwiw$
+          DECLARE
+            seq_name text := pg_get_serial_sequence('#{table_name}', '#{pk}');
+          BEGIN
+            IF seq_name IS NOT NULL THEN
+              PERFORM setval(seq_name, COALESCE((SELECT MAX(#{pk}) FROM #{table_name}), 1));
+            END IF;
+          END $exwiw$;
+        SQL
+      end
+
       def to_bulk_delete(select_query_ast, table)
         raise NotImplementedError unless select_query_ast.is_a?(Exwiw::QueryAst::Select)
 
