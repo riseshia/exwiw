@@ -2,11 +2,4 @@ INSERT INTO system_announcements (id, title, content, updated_at, created_at) VA
 ('1', 'Announcement 1', 'This is the content of announcement 1.', '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
 ('2', 'Announcement 2', 'This is the content of announcement 2.', '2025-01-01 00:00:00', '2025-01-01 00:00:00'),
 ('3', 'Announcement 3', 'This is the content of announcement 3.', '2025-01-01 00:00:00', '2025-01-01 00:00:00');
-DO $exwiw$
-DECLARE
-  seq_name text := pg_get_serial_sequence('system_announcements', 'id');
-BEGIN
-  IF seq_name IS NOT NULL THEN
-    PERFORM setval(seq_name, COALESCE((SELECT MAX(id) FROM system_announcements), 1));
-  END IF;
-END $exwiw$;
+SELECT pg_catalog.setval('public.system_announcements_id_seq', 3, true);

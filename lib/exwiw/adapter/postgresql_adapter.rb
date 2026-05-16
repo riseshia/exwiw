@@ -74,26 +74,28 @@ module Exwiw
         "INSERT INTO #{table_name} (#{column_names}) VALUES\n#{values};"
       end
 
-      # Advance the sequence backing `table.primary_key` (if any) to MAX(pk).
-      # Without this, importing into a clean DB leaves the sequence at 1 while
-      # the inserted rows occupy low IDs, so the next default-PK INSERT
-      # collides. `pg_get_serial_sequence` covers both SERIAL and IDENTITY; it
-      # returns NULL for non-auto-increment PKs, in which case we no-op.
+      # Transcribe the FROM-side sequence cursor backing `table.primary_key`
+      # onto the import target. Without this, importing into a clean DB leaves
+      # the sequence at 1 while the inserted rows occupy higher IDs, so the
+      # next default-PK INSERT collides. We query FROM's `last_value` /
+      # `is_called` directly (matching what pg_dump emits) rather than using
+      # MAX(pk), so a subsetted dump still preserves the source's "next id".
+      # Returns nil for non-auto-increment PKs (pg_get_serial_sequence -> NULL).
       def post_insert_sql(table)
-        table_name = table.name
         pk = table.primary_key
         return nil if pk.nil? || pk.empty?
 
-        <<~SQL.chomp
-          DO $exwiw$
-          DECLARE
-            seq_name text := pg_get_serial_sequence('#{table_name}', '#{pk}');
-          BEGIN
-            IF seq_name IS NOT NULL THEN
-              PERFORM setval(seq_name, COALESCE((SELECT MAX(#{pk}) FROM #{table_name}), 1));
-            END IF;
-          END $exwiw$;
-        SQL
+        seq_name = connection
+          .exec_params("SELECT pg_get_serial_sequence($1, $2)", [table.name, pk])
+          .values.dig(0, 0)
+        return nil if seq_name.nil?
+
+        last_value, is_called = connection
+          .exec("SELECT last_value, is_called FROM #{seq_name}")
+          .values.first
+        is_called_sql = (is_called == 't' || is_called == true) ? 'true' : 'false'
+
+        "SELECT pg_catalog.setval('#{escape_single_quote(seq_name)}', #{last_value}, #{is_called_sql});"
       end
 
       def to_bulk_delete(select_query_ast, table)
